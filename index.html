@@ -1,0 +1,3341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyLife — Personal Organizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --surface2: #22222e;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0eee8;
+    --muted: #888;
+    --accent1: #e8b86d; /* gold */
+    --accent2: #7eb8d4; /* blue */
+    --accent3: #b97fc7; /* purple */
+    --accent4: #7ec4a0; /* green */
+    --accent5: #e87d7d; /* red */
+    --accent6: #e8a87d; /* orange */
+    --accent7: #d4b8e8; /* lavender */
+    --r: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .app-header {
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    background: linear-gradient(135deg, var(--accent1), var(--accent6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .date-display {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 300;
+  }
+
+  /* Tab Navigation */
+  .tab-nav {
+    display: flex;
+    background: var(--surface);
+    padding: 0 16px;
+    gap: 4px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 14px 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn .icon { font-size: 1rem; }
+
+  .tab-btn.active {
+    color: var(--text);
+    border-bottom-color: var(--tab-color);
+  }
+
+  /* Content */
+  .content { flex: 1; padding: 28px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  .tab-panel { display: none; animation: fadeIn 0.25s ease; }
+  .tab-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Section Header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+
+  /* Input Styles */
+  input, select, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--accent-color, var(--accent1)); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .input-row input, .input-row select { flex: 1; min-width: 120px; }
+  .input-row label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent-color, var(--accent1));
+    color: var(--bg);
+  }
+
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent-color); }
+
+  .btn-danger { background: #e87d7d22; border: 1px solid #e87d7d44; color: #e87d7d; padding: 5px 10px; font-size: 0.78rem; }
+  .btn-danger:hover { background: #e87d7d33; }
+
+  /* To-Do List */
+  .todo-list { list-style: none; }
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: var(--surface2);
+    border-radius: 9px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .todo-item:hover { border-color: var(--border); }
+  .todo-item.done { opacity: 0.45; }
+  .todo-item.done .todo-text { text-decoration: line-through; }
+
+  .todo-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--accent1);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .todo-item.done .todo-check { background: var(--accent1); border-color: var(--accent1); }
+  .todo-check::after { content: '✓'; font-size: 0.65rem; color: var(--bg); display: none; }
+  .todo-item.done .todo-check::after { display: block; }
+
+  .todo-text { flex: 1; font-size: 0.9rem; }
+  .todo-priority {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .priority-high { background: #e87d7d22; color: #e87d7d; }
+  .priority-med { background: var(--accent1)22; color: var(--accent1); }
+  .priority-low { background: var(--accent4)22; color: var(--accent4); }
+
+  /* Stats Row */
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent-color, var(--accent1));
+    display: block;
+  }
+
+  .stat-label { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+  /* Expense list */
+  .expense-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 9px;
+    margin-bottom: 8px;
+  }
+
+  .expense-left { display: flex; align-items: center; gap: 12px; }
+  .expense-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  .expense-name { font-size: 0.9rem; font-weight: 500; }
+  .expense-cat { font-size: 0.75rem; color: var(--muted); }
+  .expense-amount { font-family: 'Playfair Display', serif; font-size: 1rem; }
+  .expense-amount.income { color: var(--accent4); }
+  .expense-amount.expense-neg { color: var(--accent5); }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--surface2);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: var(--accent-color, var(--accent1));
+    transition: width 0.5s ease;
+  }
+
+  /* Health metrics */
+  .metric-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .metric-item:last-child { border-bottom: none; }
+  .metric-label { font-size: 0.85rem; color: var(--muted); }
+  .metric-value { font-size: 1.1rem; font-weight: 600; color: var(--text); }
+  .metric-unit { font-size: 0.75rem; color: var(--muted); }
+
+  /* Gym workout */
+  .workout-set {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+  }
+
+  .set-badge {
+    background: var(--accent3)22;
+    color: var(--accent3);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Food / Meals */
+  .meal-block { margin-bottom: 20px; }
+  .meal-type {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-color, var(--accent6));
+    margin-bottom: 8px;
+  }
+
+  .food-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+  }
+
+  .food-macros { display: flex; gap: 12px; font-size: 0.73rem; color: var(--muted); }
+
+  /* Birthday */
+  .birthday-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    background: var(--surface2);
+    border-radius: 9px;
+    margin-bottom: 8px;
+  }
+
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .bday-name { font-size: 0.9rem; font-weight: 500; }
+  .bday-date { font-size: 0.75rem; color: var(--muted); }
+  .bday-countdown {
+    margin-left: auto;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .soon { background: var(--accent7)22; color: var(--accent7); }
+  .today-badge { background: var(--accent1)22; color: var(--accent1); }
+  .later { background: var(--surface); color: var(--muted); }
+
+  /* Modal */
+  .modal-bg {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-bg.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popIn 0.2s ease;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: var(--accent-color, var(--accent1));
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { font-size: 0.78rem; color: var(--muted); display: block; margin-bottom: 6px; }
+
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  select option { background: var(--surface2); }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 500;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.88rem; }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  .calorie-ring {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .ring-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+  }
+
+  .ring-label { font-size: 0.8rem; color: var(--muted); }
+
+  /* ── MVP Blueprint Styles ── */
+  .mvp-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mvp-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, #e8b86d22, transparent 70%);
+    border-radius: 50%;
+  }
+  .mvp-hero-top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; position: relative; }
+  .mvp-ring-wrap { position: relative; flex-shrink: 0; }
+  .mvp-ring-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; color: var(--accent1);
+  }
+  .mvp-hero-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: var(--accent1); margin-bottom: 4px;
+  }
+  .mvp-hero-text p { font-size: 0.82rem; color: var(--muted); }
+  .mvp-hero-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .mvp-badge {
+    font-size: 0.72rem; font-weight: 600; border-radius: 20px;
+    padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .mvp-hero-actions { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Phase bars in hero */
+  .phase-strip { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .phase-chip {
+    flex: 1; min-width: 88px; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px;
+  }
+  .phase-chip .pc-name { font-size: 0.7rem; color: var(--muted); margin-bottom: 3px; }
+  .phase-chip .pc-pct  { font-size: 1rem; font-weight: 700; margin-bottom: 3px; }
+  .phase-chip .pc-bar  { height: 3px; background: rgba(255,255,255,0.08); border-radius: 3px; }
+  .phase-chip .pc-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+  .phase-chip .pc-sub  { font-size: 0.68rem; color: #444; margin-top: 3px; }
+
+  /* Pillar accordion */
+  .pillar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 12px;
+    transition: border-color .2s;
+  }
+  .pillar-card:hover { border-color: rgba(255,255,255,0.12); }
+  .pillar-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 18px; cursor: pointer; user-select: none;
+    transition: background .2s;
+  }
+  .pillar-header:hover { background: rgba(255,255,255,0.03); }
+  .pillar-icon-box {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .pillar-title-text {
+    font-family: 'Playfair Display', serif; font-size: 0.95rem;
+    color: var(--text); font-weight: 500;
+  }
+  .pillar-sub-text { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+  .pillar-chevron {
+    margin-left: auto; font-size: 1rem; transition: transform .2s;
+    color: var(--muted); flex-shrink: 0;
+  }
+  .pillar-chevron.open { transform: rotate(180deg); }
+  .pillar-prog-bar { height: 2px; background: rgba(255,255,255,0.05); }
+  .pillar-prog-fill { height: 100%; transition: width .5s; }
+  .pillar-task-list { display: none; padding: 0 18px 10px; }
+  .pillar-task-list.open { display: block; }
+
+  /* Task rows inside pillar */
+  .bp-task-row {
+    display: flex; gap: 12px; padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    align-items: flex-start; transition: opacity .2s;
+  }
+  .bp-task-row:last-child { border-bottom: none; }
+  .bp-task-row.done { opacity: 0.45; }
+  .bp-check {
+    margin-top: 2px; width: 20px; height: 20px; border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.2); background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all .2s;
+    font-size: 0.65rem; font-weight: 700; color: var(--bg);
+  }
+  .bp-check.checked { border-color: var(--pc); background: var(--pc); }
+  .bp-task-content { flex: 1; min-width: 0; }
+  .bp-task-name {
+    font-size: 0.85rem; color: var(--text); font-weight: 500; line-height: 1.4;
+  }
+  .bp-task-row.done .bp-task-name { text-decoration: line-through; color: var(--muted); }
+  .bp-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  .bp-tag {
+    font-size: 0.68rem; font-weight: 600; border-radius: 5px; padding: 2px 7px;
+  }
+  .bp-task-meta {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
+  }
+  .bp-task-meta input[type=date] {
+    font-size: 0.7rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 3px 7px; color: var(--muted); cursor: pointer; width: auto;
+  }
+  .bp-task-meta input[type=date].overdue { border-color: #e87d7d44; color: #e87d7d; }
+  .btn-cal-add {
+    font-size: 0.68rem; padding: 3px 9px; border-radius: 7px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: pointer; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all .2s;
+  }
+  .btn-cal-add.added { border-color: #7ec4a044; background: #7ec4a011; color: #7ec4a0; }
+
+  /* Mini ring SVG */
+  .mini-ring { position: relative; flex-shrink: 0; }
+  .mini-ring-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.62rem; font-weight: 700;
+  }
+
+  /* Filter bar */
+  .mvp-filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 16px; align-items: center;
+  }
+  .mvp-filter-bar input[type=text] {
+    flex: 1; min-width: 150px; padding: 8px 13px;
+    border-radius: 10px; font-size: 0.83rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); outline: none; width: auto;
+  }
+  .mvp-fbtn {
+    padding: 7px 13px; border-radius: 9px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+  }
+  .mvp-fbtn.active { border-color: var(--accent2); background: var(--accent2)15; color: var(--accent2); }
+  .mvp-fbtn.danger { color: var(--accent5); }
+
+  /* Overview grid */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .ov-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 16px 18px;
+  }
+  .ov-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .ov-prog { height: 7px; background: var(--surface2); border-radius: 7px; }
+  .ov-prog-fill { height: 100%; border-radius: 7px; transition: width .5s; }
+
+  /* Upcoming tab */
+  .upco-row {
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 8px;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .upco-row.overdue { background: #e87d7d0a; border: 1px solid #e87d7d22; }
+  .upco-row.normal  { background: var(--surface); border: 1px solid var(--border); }
+
+  /* Calendar tab */
+  .cal-grid-mvp { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .cal-pillar-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+  }
+  .cal-pillar-box .cpb-title { font-weight: 600; font-size: 0.85rem; color: var(--text); }
+  .cal-pillar-box .cpb-sub   { font-size: 0.72rem; color: var(--muted); margin: 6px 0 10px; }
+  .btn-add-pillar {
+    width: 100%; padding: 7px; border-radius: 9px; font-size: 0.75rem;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    border: none; transition: opacity .2s;
+  }
+  .btn-add-pillar:hover { opacity: .8; }
+
+  /* Settings */
+  .settings-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 22px; margin-bottom: 16px;
+  }
+  .settings-section h3 {
+    font-size: 0.95rem; font-weight: 600; color: var(--text);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .info-box-dark {
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+    font-size: 0.78rem; line-height: 1.65;
+  }
+  .info-box-dark.amber  { background: #e8b86d0d; border: 1px solid #e8b86d22; color: #e8b86d99; }
+  .info-box-dark.blue   { background: #7eb8d40d; border: 1px solid #7eb8d422; color: #7eb8d499; }
+  .settings-input-dark {
+    width: 100%; padding: 9px 13px; border-radius: 9px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.85rem; outline: none;
+    font-family: 'DM Sans', sans-serif; margin-bottom: 12px;
+  }
+  .btn-sm { padding: 8px 16px; border-radius: 9px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; border: none; }
+  .btn-sm-primary { background: var(--accent2); color: var(--bg); }
+  .btn-sm-ghost   { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-sm-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+  .btn-sm-danger  { background: #e87d7d15; border: 1px solid #e87d7d33; color: #e87d7d; }
+
+  /* Toast */
+  #bpToast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    max-width: 340px; padding: 11px 16px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.82rem; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(10px); transition: all .3s; pointer-events: none;
+  }
+  #bpToast.show { opacity: 1; transform: none; }
+
+  /* Sync badge */
+  .sync-pill {
+    font-size: 0.7rem; font-weight: 600; border-radius: 20px;
+    padding: 2px 9px; display: inline-flex; align-items: center; gap: 3px;
+  }
+
+  @media(max-width:600px) {
+    .mvp-hero { padding: 18px; }
+    .mvp-hero-actions { width: 100%; }
+    .phase-strip { gap: 6px; }
+  }
+
+
+  /* ===== AUTH / LOGIN ===== */
+  #auth-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #auth-screen.hidden { display: none; }
+
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    animation: popIn 0.3s ease;
+  }
+
+  .auth-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    background: linear-gradient(135deg, #e8b86d, #e8a87d);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center; margin-bottom: 4px;
+  }
+
+  .auth-subtitle {
+    text-align: center; font-size: 0.82rem;
+    color: var(--muted); margin-bottom: 28px;
+  }
+
+  .auth-welcome {
+    text-align: center; font-size: 1rem;
+    color: var(--text); font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .auth-info {
+    background: var(--accent1)0d;
+    border: 1px solid var(--accent1)22;
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 0.8rem; color: var(--muted);
+    line-height: 1.6; margin-bottom: 20px;
+  }
+
+  .auth-field { margin-bottom: 16px; }
+  .auth-field label {
+    display: block; font-size: 0.75rem;
+    color: var(--muted); margin-bottom: 6px; font-weight: 500;
+  }
+
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 42px; }
+  .pw-eye {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    font-size: 0.9rem; color: var(--muted); padding: 4px;
+    font-family: inherit;
+  }
+
+  .pw-strength {
+    height: 3px; border-radius: 3px; margin-top: 6px;
+    transition: all 0.3s; background: transparent;
+  }
+
+  .auth-hint { min-height: 20px; margin-bottom: 6px; }
+
+  .auth-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #e8b86d, #e8a87d);
+    color: var(--bg); border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    font-weight: 700; cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 6px;
+  }
+  .auth-btn:hover { opacity: 0.88; }
+  .auth-btn:active { transform: scale(0.98); }
+
+  .auth-link {
+    display: block; text-align: center; margin-top: 14px;
+    background: none; border: none; color: var(--muted);
+    font-size: 0.78rem; cursor: pointer; font-family: inherit;
+    text-decoration: underline; padding: 4px;
+  }
+  .auth-link:hover { color: var(--text); }
+
+  .auth-footer-note {
+    text-align: center; font-size: 0.72rem;
+    color: #444; margin-top: 14px; line-height: 1.5;
+  }
+
+  /* Header changes */
+  #app-header { display: none; }
+  #app-wrapper { display: none; }
+
+  .auth-user-pill {
+    font-size: 0.75rem; font-weight: 600;
+    background: var(--accent1)15; color: var(--accent1);
+    border: 1px solid var(--accent1)22;
+    border-radius: 20px; padding: 4px 12px;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .auth-lock-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px;
+    padding: 5px 9px; cursor: pointer; font-size: 0.85rem;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .auth-lock-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  /* Session timeout bar */
+  #session-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent1); z-index: 500;
+    transform-origin: left; transition: transform 1s linear;
+  }
+
+
+  /* ── Drive Status Card ── */
+  .drive-status-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 18px 20px; margin-bottom: 16px;
+    gap: 14px; flex-wrap: wrap;
+  }
+  .dsc-left  { display: flex; align-items: center; gap: 14px; }
+  .dsc-icon  { font-size: 1.8rem; }
+  .dsc-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .dsc-sub   { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .dsc-right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Drive connected files card */
+  .drive-files-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 18px 20px; margin-bottom: 12px;
+  }
+  .drive-file-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--surface2);
+    border-radius: 9px; margin-bottom: 8px;
+  }
+  .drive-file-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .drive-file-name { font-size: 0.83rem; font-weight: 600; color: var(--text); }
+  .drive-file-meta { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+  .drive-file-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* Auto-sync toggle row */
+  .drive-auto-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px 18px; margin-bottom: 12px; gap: 14px;
+  }
+  .drive-last-sync {
+    font-size: 0.72rem; color: var(--muted);
+    text-align: right; margin-bottom: 16px; padding-right: 4px;
+  }
+
+  /* Toggle switch */
+  .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 24px; transition: .2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 16px; height: 16px; left: 3px; top: 3px;
+    background: var(--muted); border-radius: 50%; transition: .2s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: #7ec4a033; border-color: #7ec4a066; }
+  .toggle-switch input:checked + .toggle-slider::before { background: #7ec4a0; transform: translateX(20px); }
+
+  /* Drive sync status in header */
+  #drive-header-pill {
+    font-size: 0.7rem; font-weight: 600; border-radius: 20px;
+    padding: 3px 9px; display: none; align-items: center; gap: 4px;
+    cursor: default;
+  }
+
+
+  /* ── Setup toggle tabs ── */
+  .auth-toggle-row {
+    display: flex; gap: 0; margin-bottom: 20px;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .auth-toggle-btn {
+    flex: 1; padding: 10px 8px; background: none;
+    border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 600; color: var(--muted);
+    transition: all 0.2s;
+  }
+  .auth-toggle-btn.active {
+    background: var(--surface2); color: var(--text);
+  }
+  .auth-toggle-btn:first-child { border-right: 1px solid var(--border); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">MyLife</div>
+    <div class="auth-subtitle" id="auth-subtitle">Your personal command centre</div>
+
+    <!-- Setup view -->
+    <div id="view-setup" style="display:none">
+
+      <!-- Toggle tabs -->
+      <div class="auth-toggle-row">
+        <button class="auth-toggle-btn active" id="toggle-new" onclick="switchSetupTab('new')">New Account</button>
+        <button class="auth-toggle-btn" id="toggle-restore" onclick="switchSetupTab('restore')">Restore from Drive</button>
+      </div>
+
+      <!-- New account panel -->
+      <div id="setup-panel-new">
+        <div class="auth-info">👋 First time here? Create a master password to encrypt all your data.</div>
+        <div class="auth-field">
+          <label>Username</label>
+          <input type="text" id="setup-user" placeholder="Choose a username" autocomplete="username"/>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="setup-pass" placeholder="Create a strong password"
+              autocomplete="new-password" oninput="checkPwStrength(this.value)"/>
+            <button class="pw-eye" onclick="toggleEye('setup-pass',this)">👁</button>
+          </div>
+          <div class="pw-strength" id="pw-strength"></div>
+        </div>
+        <div class="auth-field">
+          <label>Confirm Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="setup-confirm" placeholder="Re-enter password" autocomplete="new-password"/>
+            <button class="pw-eye" onclick="toggleEye('setup-confirm',this)">👁</button>
+          </div>
+        </div>
+        <div style="min-height:18px;margin-bottom:6px"><span id="setup-hint" style="color:#e87d7d;font-size:0.78rem"></span></div>
+        <button class="auth-btn" onclick="authSetup()">🔐 Create Account & Enter</button>
+        <div class="auth-footer-note">🔒 AES-256 encrypted · Never leaves your device · Zero servers</div>
+      </div>
+
+      <!-- Restore from Drive panel -->
+      <div id="setup-panel-restore" style="display:none">
+        <div class="auth-info" style="background:#7eb8d415;border-color:#7eb8d433">
+          ☁️ Already have data on Google Drive? Connect below to restore your account and all data automatically.
+        </div>
+        <div class="auth-field">
+          <label>Google OAuth Client ID</label>
+          <input type="text" id="restore-client-id" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"
+            style="font-size:0.78rem"/>
+        </div>
+        <div id="restore-hint" style="color:#e87d7d;font-size:0.78rem;min-height:18px;margin-bottom:6px"></div>
+        <button class="auth-btn" style="background:linear-gradient(135deg,#7eb8d4,#7ec4a0)" onclick="restoreFromDrive()">
+          ☁️ Connect Drive & Restore My Account
+        </button>
+        <div class="auth-footer-note">Your password will be restored from your Drive backup — no need to re-enter it.</div>
+      </div>
+
+    </div>
+
+    <!-- Login view -->
+    <div id="view-login" style="display:none">
+      <div class="auth-welcome" id="auth-welcome"></div>
+      <div class="auth-field">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="Your username" autocomplete="username"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')authLogin()"/>
+          <button class="pw-eye" onclick="toggleEye('login-pass',this)">👁</button>
+        </div>
+      </div>
+      <div id="login-error" style="color:#e87d7d;font-size:0.78rem;min-height:18px;margin-bottom:4px"></div>
+      <button class="auth-btn" id="login-btn" onclick="authLogin()">🔓 Unlock MyLife</button>
+      <button class="auth-link" onclick="showResetConfirm()">Forgot password? Reset all data</button>
+    </div>
+
+    <!-- Reset confirm -->
+    <div id="view-reset" style="display:none">
+      <div class="auth-info" style="background:#e87d7d15;border-color:#e87d7d33;color:#e87d7dcc">
+        ⚠️ This will permanently delete ALL your data and login credentials. This cannot be undone.
+      </div>
+      <button class="auth-btn" style="background:#e87d7d;margin-top:8px" onclick="authHardReset()">💥 Delete Everything & Reset</button>
+      <button class="auth-link" onclick="showLogin()">↩ Go back</button>
+    </div>
+
+    <!-- Loading view -->
+    <div id="view-loading">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:2rem;margin-bottom:12px;animation:spin 1s linear infinite">⏳</div>
+        <div style="color:var(--muted);font-size:0.85rem" id="loading-msg">Checking credentials…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHANGE PASSWORD MODAL ===== -->
+<div class="modal-bg" id="changePwModal">
+  <div class="modal" style="--accent-color:#b97fc7">
+    <div class="modal-title">🔑 Change Password</div>
+    <div class="form-group"><label>Current Password</label>
+      <div class="pw-wrap"><input type="password" id="cp-current" placeholder="Current password"/><button class="pw-eye" onclick="toggleEye('cp-current',this)">👁</button></div>
+    </div>
+    <div class="form-group"><label>New Password</label>
+      <div class="pw-wrap"><input type="password" id="cp-new" placeholder="New password" oninput="checkPwStrength(this.value,'cp-strength')"/><button class="pw-eye" onclick="toggleEye('cp-new',this)">👁</button></div>
+      <div class="pw-strength" id="cp-strength"></div>
+    </div>
+    <div class="form-group"><label>Confirm New Password</label>
+      <div class="pw-wrap"><input type="password" id="cp-confirm" placeholder="Confirm new password"/><button class="pw-eye" onclick="toggleEye('cp-confirm',this)">👁</button></div>
+    </div>
+    <div id="cp-error" style="color:#e87d7d;font-size:0.78rem;min-height:18px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('changePwModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="authChangePw()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<div id="session-bar"></div>
+
+<header class="app-header" id="app-header">
+  <div class="logo">MyLife</div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="date-display" id="headerDate"></div>
+    <span id="drive-header-pill"></span>
+    <div class="auth-user-pill" id="auth-user-pill"></div>
+    <button class="auth-lock-btn" onclick="authLock()" title="Lock App">🔒 Lock</button>
+  </div>
+</header>
+
+<div id="app-wrapper" style="display:none;flex-direction:column;flex:1">
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="todo" style="--tab-color: #e8b86d">
+    <span class="icon">✓</span> Daily To-Do
+  </button>
+  <button class="tab-btn" data-tab="expense" style="--tab-color: #7ec4a0">
+    <span class="icon">💳</span> Expenses
+  </button>
+  <button class="tab-btn" data-tab="health" style="--tab-color: #7eb8d4">
+    <span class="icon">❤️</span> Health
+  </button>
+  <button class="tab-btn" data-tab="gym" style="--tab-color: #b97fc7">
+    <span class="icon">🏋️</span> Gym
+  </button>
+  <button class="tab-btn" data-tab="food" style="--tab-color: #e8a87d">
+    <span class="icon">🥗</span> Food
+  </button>
+  <button class="tab-btn" data-tab="birthday" style="--tab-color: #d4b8e8">
+    <span class="icon">🎂</span> Birthdays
+  </button>
+
+  <button class="tab-btn" data-tab="blueprint" style="--tab-color: #e8b86d">
+    <span class="icon">🏆</span> MVP Blueprint
+  </button>
+  <button class="tab-btn" data-tab="overview" style="--tab-color: #7eb8d4">
+    <span class="icon">📊</span> Overview
+  </button>
+  <button class="tab-btn" data-tab="upcoming" style="--tab-color: #b97fc7">
+    <span class="icon">📅</span> Upcoming
+  </button>
+  <button class="tab-btn" data-tab="bpcalendar" style="--tab-color: #7ec4a0">
+    <span class="icon">🗓</span> Calendar Sync
+  </button>
+  <button class="tab-btn" data-tab="bpsettings" style="--tab-color: #d4b8e8">
+    <span class="icon">⚙️</span> Drive & Settings
+  </button>
+
+</nav>
+
+<main class="content">
+
+  <!-- ===== TO-DO ===== -->
+  <div class="tab-panel active" id="tab-todo" style="--accent-color: #e8b86d">
+    <div class="section-header">
+      <h2 class="section-title">Daily To-Do</h2>
+      <button class="btn btn-primary" onclick="openModal('todoModal')">+ Add Task</button>
+    </div>
+
+    <div class="stat-cards" id="todoStats"></div>
+
+    <div class="card">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost filter-btn active" data-filter="all" onclick="filterTodos('all',this)">All</button>
+        <button class="btn btn-ghost filter-btn" data-filter="pending" onclick="filterTodos('pending',this)">Pending</button>
+        <button class="btn btn-ghost filter-btn" data-filter="done" onclick="filterTodos('done',this)">Completed</button>
+      </div>
+      <ul class="todo-list" id="todoList"></ul>
+    </div>
+  </div>
+
+  <!-- ===== EXPENSE ===== -->
+  <div class="tab-panel" id="tab-expense" style="--accent-color: #7ec4a0">
+    <div class="section-header">
+      <h2 class="section-title">Expense Manager</h2>
+      <button class="btn btn-primary" onclick="openModal('expenseModal')">+ Add Entry</button>
+    </div>
+
+    <div class="stat-cards" id="expenseStats"></div>
+
+    <div class="card-grid">
+      <div class="card" id="expenseBudget"></div>
+      <div class="card">
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">By Category</div>
+        <div id="expenseCats"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Recent Transactions</div>
+      <div id="expenseList"></div>
+    </div>
+  </div>
+
+  <!-- ===== HEALTH ===== -->
+  <div class="tab-panel" id="tab-health" style="--accent-color: #7eb8d4">
+    <div class="section-header">
+      <h2 class="section-title">Health Monitor</h2>
+      <button class="btn btn-primary" onclick="openModal('healthModal')">+ Log Today</button>
+    </div>
+
+    <div class="card-grid">
+      <div class="card" id="healthMetrics"></div>
+      <div class="card" id="healthGoals"></div>
+    </div>
+
+    <div class="card" id="healthHistory"></div>
+  </div>
+
+  <!-- ===== GYM ===== -->
+  <div class="tab-panel" id="tab-gym" style="--accent-color: #b97fc7">
+    <div class="section-header">
+      <h2 class="section-title">Gym Tracker</h2>
+      <button class="btn btn-primary" onclick="openModal('gymModal')">+ Log Workout</button>
+    </div>
+
+    <div class="stat-cards" id="gymStats"></div>
+
+    <div class="card">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Workout Log</div>
+      <div id="gymList"></div>
+    </div>
+  </div>
+
+  <!-- ===== FOOD ===== -->
+  <div class="tab-panel" id="tab-food" style="--accent-color: #e8a87d">
+    <div class="section-header">
+      <h2 class="section-title">Food Journal</h2>
+      <button class="btn btn-primary" onclick="openModal('foodModal')">+ Log Meal</button>
+    </div>
+
+    <div class="card-grid">
+      <div class="card" id="calorieCard"></div>
+      <div class="card" id="macroCard"></div>
+    </div>
+
+    <div class="card" id="mealsLog"></div>
+  </div>
+
+  <!-- ===== BIRTHDAY ===== -->
+  <div class="tab-panel" id="tab-birthday" style="--accent-color: #d4b8e8">
+    <div class="section-header">
+      <h2 class="section-title">Birthday Manager</h2>
+      <button class="btn btn-primary" onclick="openModal('bdayModal')">+ Add Birthday</button>
+    </div>
+
+    <div class="card" id="upcomingBdays" style="margin-bottom:16px"></div>
+    <div class="card" id="bdayList"></div>
+  </div>
+
+
+
+  <!-- ===== MVP BLUEPRINT ===== -->
+  <div class="tab-panel" id="tab-blueprint" style="--accent-color: #e8b86d">
+    <div class="section-header">
+      <h2 class="section-title">MVP Blueprint</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="bp-sync-pill" class="sync-pill"></span>
+        <button class="btn btn-primary" onclick="bpAddAllHighToCalendar()">📅 Add High-Priority</button>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="mvp-hero">
+      <div class="mvp-hero-top">
+        <div class="mvp-ring-wrap" style="width:80px;height:80px">
+          <svg width="80" height="80" style="transform:rotate(-90deg)">
+            <circle cx="40" cy="40" r="33" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+            <circle id="bp-hero-ring" cx="40" cy="40" r="33" fill="none" stroke="#e8b86d" stroke-width="6"
+              stroke-dasharray="0 207" stroke-linecap="round" style="transition:stroke-dasharray .6s ease"/>
+          </svg>
+          <div class="mvp-ring-label" id="bp-hero-pct" style="font-size:1rem">0%</div>
+        </div>
+        <div class="mvp-hero-text">
+          <h2>Life Mastery Blueprint</h2>
+          <p id="bp-hero-sub">3-Year Total Transformation</p>
+          <div class="mvp-hero-badges" id="bp-hero-badges"></div>
+        </div>
+        <div class="mvp-hero-actions">
+          <button class="btn btn-ghost" onclick="bpExpandAll()">⊞ Expand All</button>
+          <button class="btn btn-ghost" onclick="bpCollapseAll()">⊟ Collapse</button>
+        </div>
+      </div>
+      <div class="phase-strip" id="bp-phase-strip"></div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="mvp-filter-bar">
+      <input type="text" id="bp-search" placeholder="🔍 Search tasks…" oninput="bpRenderDashboard()"/>
+      <button class="mvp-fbtn active" id="bpf-all"     onclick="bpSetFilter('all',this)">All</button>
+      <button class="mvp-fbtn"        id="bpf-pending" onclick="bpSetFilter('pending',this)">Pending</button>
+      <button class="mvp-fbtn"        id="bpf-done"    onclick="bpSetFilter('done',this)">Done ✓</button>
+      <button class="mvp-fbtn danger" id="bpf-overdue" onclick="bpSetFilter('overdue',this)">Overdue</button>
+      <button class="mvp-fbtn"        id="bpf-high"    onclick="bpSetFilter('high',this)">🔴 High</button>
+    </div>
+
+    <div id="bp-pillar-list"></div>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="tab-panel" id="tab-overview" style="--accent-color: #7eb8d4">
+    <div class="section-header">
+      <h2 class="section-title">Pillar Overview</h2>
+    </div>
+    <div class="overview-grid" id="bp-overview-grid"></div>
+    <div class="card" id="bp-phase-overview"></div>
+  </div>
+
+  <!-- ===== UPCOMING ===== -->
+  <div class="tab-panel" id="tab-upcoming" style="--accent-color: #b97fc7">
+    <div class="section-header">
+      <h2 class="section-title">Upcoming Tasks</h2>
+    </div>
+    <div id="bp-upcoming-content"></div>
+  </div>
+
+  <!-- ===== CALENDAR SYNC ===== -->
+  <div class="tab-panel" id="tab-bpcalendar" style="--accent-color: #7ec4a0">
+    <div class="section-header">
+      <h2 class="section-title">Calendar Sync</h2>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Bulk Add to Google Calendar</div>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Click "Add to Cal" on any task, or use buttons below to batch-add events. Each opens in Google Calendar with details pre-filled.</p>
+      <button class="btn btn-primary" onclick="bpAddAllHighToCalendar()">📅 Add All High-Priority Tasks</button>
+    </div>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Add by Pillar</div>
+    <div class="cal-grid-mvp" id="bp-cal-grid"></div>
+  </div>
+
+  <!-- ===== DRIVE & SETTINGS ===== -->
+  <div class="tab-panel" id="tab-bpsettings" style="--accent-color: #d4b8e8">
+    <div class="section-header">
+      <h2 class="section-title">Drive & Settings</h2>
+    </div>
+
+    <!-- ── GOOGLE DRIVE STATUS CARD ── -->
+    <div class="drive-status-card" id="drive-status-card">
+      <div class="dsc-left">
+        <div class="dsc-icon" id="dsc-icon">☁️</div>
+        <div>
+          <div class="dsc-title" id="dsc-title">Google Drive</div>
+          <div class="dsc-sub"  id="dsc-sub">Not connected</div>
+        </div>
+      </div>
+      <div class="dsc-right" id="dsc-right">
+        <button class="btn-sm btn-sm-primary" onclick="driveConnect()">Connect Drive</button>
+      </div>
+    </div>
+
+    <!-- ── DRIVE CONNECTED PANEL ── -->
+    <div id="drive-connected-panel" style="display:none">
+      <div class="drive-files-card">
+        <div style="font-size:0.75rem;color:var(--muted);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px">Backup Files on Drive</div>
+        <div id="drive-files-list"><div style="color:var(--muted);font-size:0.82rem">Loading files…</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn-sm btn-sm-primary" onclick="driveSaveNow()">☁️ Save to Drive Now</button>
+          <button class="btn-sm btn-sm-ghost" onclick="driveLoadLatest()">⬇️ Restore from Drive</button>
+          <button class="btn-sm btn-sm-ghost" onclick="driveListFiles()">🔄 Refresh</button>
+        </div>
+      </div>
+      <div class="drive-auto-row">
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:var(--text)">Auto-sync every change</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:2px">Saves encrypted backup to Drive on every action</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="drive-autosync" checked onchange="driveToggleAutosync(this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="drive-last-sync" id="drive-last-sync">Last synced: Never</div>
+    </div>
+
+    <!-- ── SETUP PANEL ── -->
+    <div class="settings-section" id="drive-setup-panel">
+      <h3>☁️ Connect Google Drive</h3>
+      <div class="info-box-dark amber">
+        <strong>One-Time Setup (5 min):</strong><br/>
+        1. Go to <a href="https://console.cloud.google.com" target="_blank" style="color:#e8b86d">console.cloud.google.com</a> → New project<br/>
+        2. Enable <strong>Google Drive API</strong> &amp; <strong>Google Calendar API</strong><br/>
+        3. Credentials → Create OAuth 2.0 Client (Web App)<br/>
+        4. Authorised redirect URI → <code id="redirect-uri-display" style="word-break:break-all;color:#e8b86d"></code><br/>
+        5. Paste Client ID below and click Connect
+      </div>
+      <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Google OAuth Client ID</label>
+      <input class="settings-input-dark" id="bp-client-id" placeholder="xxxx.apps.googleusercontent.com" oninput="driveClientIdChanged()"/>
+      <div id="bp-drive-connect-area">
+        <button class="btn-sm btn-sm-primary" onclick="driveConnect()">🔐 Connect Google Drive</button>
+      </div>
+    </div>
+
+    <!-- ── ACCOUNT SECURITY ── -->
+    <div class="settings-section">
+      <h3>🔑 Account Security</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm btn-sm-ghost" onclick="openModal('changePwModal')">🔑 Change Password</button>
+        <button class="btn-sm btn-sm-danger" onclick="authLock()">🔒 Lock App</button>
+      </div>
+    </div>
+
+    <!-- ── LOCAL BACKUP ── -->
+    <div class="settings-section">
+      <h3>💾 Local Backup</h3>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Export an encrypted backup file you can import on any device.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn-sm btn-sm-ghost" onclick="exportFullBackup()">⬇️ Export Encrypted Backup</button>
+        <button class="btn-sm btn-sm-ghost" onclick="bpImportData()">⬆️ Import Backup</button>
+        <button class="btn-sm btn-sm-danger" onclick="fullReset()">🗑 Reset All Data</button>
+      </div>
+      <div id="bp-data-stats" style="font-size:0.75rem;color:var(--muted)"></div>
+    </div>
+
+    <!-- ── ABOUT ── -->
+    <div class="settings-section" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-color:rgba(232,184,109,0.15)">
+      <h3 style="color:var(--accent1)">🏆 About MyLife 360°</h3>
+      <p id="bp-about-text" style="font-size:0.82rem;color:var(--muted);line-height:1.7"></p>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Todo Modal -->
+<div class="modal-bg" id="todoModal">
+  <div class="modal" style="--accent-color:#e8b86d">
+    <div class="modal-title">New Task</div>
+    <div class="form-group"><label>Task Name</label><input type="text" id="todoTitle" placeholder="What needs to be done?"></div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Priority</label>
+        <select id="todoPriority">
+          <option value="low">Low</option>
+          <option value="med" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1"><label>Category</label>
+        <select id="todoCategory">
+          <option>Work</option><option>Personal</option><option>Health</option>
+          <option>Finance</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Due Time</label><input type="time" id="todoTime"></div>
+    <div class="form-group"><label>Notes</label><textarea id="todoNotes" placeholder="Optional notes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('todoModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-bg" id="expenseModal">
+  <div class="modal" style="--accent-color:#7ec4a0">
+    <div class="modal-title">Add Transaction</div>
+    <div class="form-group"><label>Description</label><input type="text" id="expName" placeholder="e.g. Groceries, Salary..."></div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Amount (₹)</label><input type="number" id="expAmount" placeholder="0.00"></div>
+      <div class="form-group" style="flex:1"><label>Type</label>
+        <select id="expType">
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Category</label>
+      <select id="expCat">
+        <option>Food</option><option>Transport</option><option>Shopping</option>
+        <option>Health</option><option>Entertainment</option><option>Bills</option>
+        <option>Salary</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Date</label><input type="date" id="expDate"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addExpense()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Health Modal -->
+<div class="modal-bg" id="healthModal">
+  <div class="modal" style="--accent-color:#7eb8d4">
+    <div class="modal-title">Log Health Data</div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Weight (kg)</label><input type="number" id="hWeight" placeholder="70"></div>
+      <div class="form-group" style="flex:1"><label>Steps</label><input type="number" id="hSteps" placeholder="8000"></div>
+    </div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Blood Pressure</label><input type="text" id="hBP" placeholder="120/80"></div>
+      <div class="form-group" style="flex:1"><label>Heart Rate (bpm)</label><input type="number" id="hHR" placeholder="72"></div>
+    </div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Sleep (hrs)</label><input type="number" id="hSleep" placeholder="7.5" step="0.5"></div>
+      <div class="form-group" style="flex:1"><label>Water (glasses)</label><input type="number" id="hWater" placeholder="8"></div>
+    </div>
+    <div class="form-group"><label>Mood</label>
+      <select id="hMood">
+        <option>😊 Great</option><option>🙂 Good</option><option>😐 Okay</option>
+        <option>😕 Poor</option><option>😞 Bad</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('healthModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="logHealth()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Gym Modal -->
+<div class="modal-bg" id="gymModal">
+  <div class="modal" style="--accent-color:#b97fc7">
+    <div class="modal-title">Log Workout</div>
+    <div class="form-group"><label>Exercise Name</label><input type="text" id="gymExercise" placeholder="e.g. Bench Press, Squats..."></div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Sets</label><input type="number" id="gymSets" placeholder="3"></div>
+      <div class="form-group" style="flex:1"><label>Reps</label><input type="number" id="gymReps" placeholder="12"></div>
+      <div class="form-group" style="flex:1"><label>Weight (kg)</label><input type="number" id="gymWeight" placeholder="60"></div>
+    </div>
+    <div class="form-group"><label>Workout Type</label>
+      <select id="gymType">
+        <option>Chest</option><option>Back</option><option>Legs</option>
+        <option>Shoulders</option><option>Arms</option><option>Core</option>
+        <option>Cardio</option><option>Full Body</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Notes</label><input type="text" id="gymNotes" placeholder="How did it feel?"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('gymModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addGym()">Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Food Modal -->
+<div class="modal-bg" id="foodModal">
+  <div class="modal" style="--accent-color:#e8a87d">
+    <div class="modal-title">Log Food</div>
+    <div class="form-group"><label>Food Name</label><input type="text" id="foodName" placeholder="e.g. Oatmeal with berries"></div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Meal</label>
+        <select id="foodMeal">
+          <option>Breakfast</option><option>Lunch</option>
+          <option>Dinner</option><option>Snack</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1"><label>Calories</label><input type="number" id="foodCal" placeholder="300"></div>
+    </div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Protein (g)</label><input type="number" id="foodProtein" placeholder="20"></div>
+      <div class="form-group" style="flex:1"><label>Carbs (g)</label><input type="number" id="foodCarbs" placeholder="45"></div>
+      <div class="form-group" style="flex:1"><label>Fat (g)</label><input type="number" id="foodFat" placeholder="10"></div>
+    </div>
+    <div class="form-group"><label>Quantity / Notes</label><input type="text" id="foodQty" placeholder="e.g. 1 bowl, 200g"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('foodModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addFood()">Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Birthday Modal -->
+<div class="modal-bg" id="bdayModal">
+  <div class="modal" style="--accent-color:#d4b8e8">
+    <div class="modal-title">Add Birthday</div>
+    <div class="form-group"><label>Name</label><input type="text" id="bdayName" placeholder="Person's name"></div>
+    <div class="input-row">
+      <div class="form-group" style="flex:1"><label>Birthday (MM-DD)</label><input type="text" id="bdayDate" placeholder="01-15"></div>
+      <div class="form-group" style="flex:1"><label>Relationship</label>
+        <select id="bdayRel">
+          <option>Family</option><option>Friend</option><option>Colleague</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Gift Ideas</label><textarea id="bdayGifts" placeholder="Notes on gift ideas..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('bdayModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addBirthday()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+let state = JSON.parse(localStorage.getItem('mylife_state') || 'null') || {
+  todos: [],
+  expenses: [],
+  health: [],
+  gym: [],
+  food: [],
+  birthdays: [],
+  budgetGoal: 30000,
+  calorieGoal: 2000,
+  stepsGoal: 10000,
+};
+
+function save() {
+  localStorage.setItem('mylife_state', JSON.stringify(state));
+}
+
+// ===================== DATE =====================
+const now = new Date();
+document.getElementById('headerDate').textContent =
+  now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+// ===================== TABS =====================
+const BP_TABS = ['blueprint','overview','upcoming','bpcalendar','bpsettings'];
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById('tab-' + tabName);
+  if (panel) panel.classList.add('active');
+  if (BP_TABS.includes(tabName)) {
+    if (typeof bpRenderAll === 'function') bpRenderAll();
+  } else {
+    renderAll();
+  }
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ===================== MODALS =====================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  const dateEl = document.getElementById('expDate');
+  if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+// ===================== TODO =====================
+let todoFilter = 'all';
+
+function addTodo() {
+  const title = document.getElementById('todoTitle').value.trim();
+  if (!title) return alert('Please enter a task name');
+  state.todos.push({
+    id: Date.now(),
+    title,
+    priority: document.getElementById('todoPriority').value,
+    category: document.getElementById('todoCategory').value,
+    time: document.getElementById('todoTime').value,
+    notes: document.getElementById('todoNotes').value,
+    done: false,
+    date: new Date().toLocaleDateString()
+  });
+  save();
+  closeModal('todoModal');
+  clearForm(['todoTitle','todoNotes','todoTime']);
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const t = state.todos.find(t => t.id === id);
+  if (t) { t.done = !t.done; save(); renderTodos(); }
+}
+
+function deleteTodo(id) {
+  state.todos = state.todos.filter(t => t.id !== id);
+  save(); renderTodos();
+}
+
+function filterTodos(f, btn) {
+  todoFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTodos();
+}
+
+function renderTodos() {
+  const list = state.todos.filter(t =>
+    todoFilter === 'all' ? true : todoFilter === 'done' ? t.done : !t.done
+  );
+  const total = state.todos.length;
+  const done = state.todos.filter(t => t.done).length;
+  const high = state.todos.filter(t => t.priority === 'high' && !t.done).length;
+
+  document.getElementById('todoStats').innerHTML = `
+    <div class="stat-card"><span class="stat-value" style="color:#e8b86d">${total}</span><div class="stat-label">Total Tasks</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#7ec4a0">${done}</span><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#e87d7d">${high}</span><div class="stat-label">High Priority</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#7eb8d4">${total > 0 ? Math.round(done/total*100) : 0}%</span><div class="stat-label">Progress</div></div>
+  `;
+
+  const ul = document.getElementById('todoList');
+  if (!list.length) {
+    ul.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>${todoFilter === 'done' ? 'No completed tasks yet.' : 'No tasks here! Add one above.'}</p></div>`;
+    return;
+  }
+
+  ul.innerHTML = list.map(t => `
+    <li class="todo-item ${t.done ? 'done' : ''}">
+      <div class="todo-check" onclick="toggleTodo(${t.id})"></div>
+      <span class="todo-text">
+        <strong>${t.title}</strong>
+        ${t.time ? `<span style="color:var(--muted);font-size:0.75rem;margin-left:6px">⏰ ${t.time}</span>` : ''}
+        ${t.notes ? `<br><span style="font-size:0.78rem;color:var(--muted)">${t.notes}</span>` : ''}
+      </span>
+      <span class="todo-priority priority-${t.priority}">${t.priority.charAt(0).toUpperCase() + t.priority.slice(1)}</span>
+      <span style="font-size:0.73rem;color:var(--muted);margin-left:6px">${t.category}</span>
+      <button class="btn btn-danger" onclick="deleteTodo(${t.id})">✕</button>
+    </li>
+  `).join('');
+}
+
+// ===================== EXPENSES =====================
+function addExpense() {
+  const name = document.getElementById('expName').value.trim();
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  if (!name || !amount) return alert('Please fill in name and amount');
+  state.expenses.unshift({
+    id: Date.now(),
+    name, amount,
+    type: document.getElementById('expType').value,
+    category: document.getElementById('expCat').value,
+    date: document.getElementById('expDate').value || new Date().toISOString().slice(0,10)
+  });
+  save();
+  closeModal('expenseModal');
+  clearForm(['expName','expAmount']);
+  renderExpenses();
+}
+
+function deleteExpense(id) {
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  save(); renderExpenses();
+}
+
+function renderExpenses() {
+  const expenses = state.expenses.filter(e => e.type === 'expense');
+  const income = state.expenses.filter(e => e.type === 'income');
+  const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
+  const totalInc = income.reduce((s, e) => s + e.amount, 0);
+  const balance = totalInc - totalExp;
+  const budgetUsed = Math.min(totalExp / state.budgetGoal * 100, 100);
+
+  document.getElementById('expenseStats').innerHTML = `
+    <div class="stat-card"><span class="stat-value" style="color:#7ec4a0">₹${totalInc.toLocaleString()}</span><div class="stat-label">Income</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#e87d7d">₹${totalExp.toLocaleString()}</span><div class="stat-label">Expenses</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:${balance >= 0 ? '#7ec4a0' : '#e87d7d'}">₹${Math.abs(balance).toLocaleString()}</span><div class="stat-label">Balance</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#e8a87d">${state.expenses.length}</span><div class="stat-label">Transactions</div></div>
+  `;
+
+  document.getElementById('expenseBudget').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Monthly Budget</div>
+    <div style="font-size:2rem;font-family:'Playfair Display',serif;color:#7ec4a0;margin-bottom:4px">₹${totalExp.toLocaleString()}</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">of ₹${state.budgetGoal.toLocaleString()} budget</div>
+    <div class="progress-wrap"><div class="progress-fill" style="width:${budgetUsed}%;background:${budgetUsed > 80 ? '#e87d7d' : '#7ec4a0'}"></div></div>
+    <div class="progress-text"><span>${budgetUsed.toFixed(0)}% used</span><span>₹${(state.budgetGoal - totalExp).toLocaleString()} left</span></div>
+    <button class="btn btn-ghost" style="margin-top:14px;width:100%;font-size:0.78rem" onclick="setBudget()">Set Budget Goal</button>
+  `;
+
+  // Categories
+  const cats = {};
+  expenses.forEach(e => cats[e.category] = (cats[e.category] || 0) + e.amount);
+  const catColors = ['#e8b86d','#7eb8d4','#b97fc7','#7ec4a0','#e8a87d','#e87d7d','#d4b8e8'];
+  document.getElementById('expenseCats').innerHTML = Object.entries(cats).length ? Object.entries(cats).map(([cat, amt], i) => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:0.83rem;margin-bottom:4px">
+        <span>${cat}</span><span style="color:${catColors[i%catColors.length]}">₹${amt.toLocaleString()}</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-fill" style="width:${Math.round(amt/totalExp*100)}%;background:${catColors[i%catColors.length]}"></div>
+      </div>
+    </div>
+  `).join('') : '<p style="color:var(--muted);font-size:0.85rem">No expenses yet.</p>';
+
+  const catEmojis = {Food:'🍕',Transport:'🚗',Shopping:'🛍️',Health:'💊',Entertainment:'🎬',Bills:'📋',Salary:'💰',Other:'📌'};
+  document.getElementById('expenseList').innerHTML = state.expenses.length ?
+    state.expenses.slice(0, 20).map(e => `
+      <div class="expense-item">
+        <div class="expense-left">
+          <div class="expense-icon" style="background:${e.type === 'income' ? '#7ec4a022' : '#e87d7d22'}">${catEmojis[e.category] || '💰'}</div>
+          <div><div class="expense-name">${e.name}</div><div class="expense-cat">${e.category} · ${e.date}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="expense-amount ${e.type === 'income' ? 'income' : 'expense-neg'}">${e.type === 'income' ? '+' : '-'}₹${e.amount.toLocaleString()}</div>
+          <button class="btn btn-danger" onclick="deleteExpense(${e.id})">✕</button>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state"><div class="empty-icon">💳</div><p>No transactions yet. Add one!</p></div>';
+}
+
+function setBudget() {
+  const v = prompt('Enter monthly budget goal (₹):', state.budgetGoal);
+  if (v && !isNaN(v)) { state.budgetGoal = parseFloat(v); save(); renderExpenses(); }
+}
+
+// ===================== HEALTH =====================
+function logHealth() {
+  state.health.unshift({
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    weight: document.getElementById('hWeight').value,
+    steps: document.getElementById('hSteps').value,
+    bp: document.getElementById('hBP').value,
+    hr: document.getElementById('hHR').value,
+    sleep: document.getElementById('hSleep').value,
+    water: document.getElementById('hWater').value,
+    mood: document.getElementById('hMood').value
+  });
+  save();
+  closeModal('healthModal');
+  renderHealth();
+}
+
+function renderHealth() {
+  const latest = state.health[0] || {};
+  const stepsGoal = state.stepsGoal;
+
+  document.getElementById('healthMetrics').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Latest Reading · ${latest.date || 'N/A'}</div>
+    ${[
+      ['⚖️ Weight', latest.weight, 'kg'],
+      ['🫀 Blood Pressure', latest.bp, ''],
+      ['💓 Heart Rate', latest.hr, 'bpm'],
+      ['😴 Sleep', latest.sleep, 'hrs'],
+      ['💧 Water', latest.water, 'glasses'],
+      ['😊 Mood', latest.mood, '']
+    ].map(([label, val, unit]) => `
+      <div class="metric-item">
+        <span class="metric-label">${label}</span>
+        <div><span class="metric-value">${val || '—'}</span>${unit ? ` <span class="metric-unit">${unit}</span>` : ''}</div>
+      </div>
+    `).join('')}
+  `;
+
+  const steps = parseInt(latest.steps) || 0;
+  const pct = Math.min(steps / stepsGoal * 100, 100);
+
+  document.getElementById('healthGoals').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Today's Goals</div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px"><span>👟 Steps</span><span style="color:#7eb8d4">${steps.toLocaleString()} / ${stepsGoal.toLocaleString()}</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:#7eb8d4"></div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px"><span>💧 Water</span><span style="color:#7eb8d4">${latest.water || 0} / 8 glasses</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${Math.min((latest.water || 0)/8*100,100)}%;background:#7eb8d4"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px"><span>😴 Sleep</span><span style="color:#7eb8d4">${latest.sleep || 0} / 8 hrs</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${Math.min((latest.sleep || 0)/8*100,100)}%;background:#7eb8d4"></div></div>
+    </div>
+  `;
+
+  document.getElementById('healthHistory').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">History</div>
+    ${state.health.length ? state.health.slice(0,7).map(h => `
+      <div class="expense-item">
+        <div>
+          <div style="font-weight:500;font-size:0.88rem">${h.date}</div>
+          <div style="font-size:0.75rem;color:var(--muted)">${h.mood || ''} · Sleep: ${h.sleep || '—'}h · Steps: ${h.steps || '—'} · Water: ${h.water || '—'} glasses</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.9rem;font-weight:600;color:#7eb8d4">${h.weight ? h.weight + ' kg' : '—'}</div>
+          <div style="font-size:0.75rem;color:var(--muted)">BP: ${h.bp || '—'}</div>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state"><div class="empty-icon">❤️</div><p>No health data yet. Log today!</p></div>'}
+  `;
+}
+
+// ===================== GYM =====================
+function addGym() {
+  const exercise = document.getElementById('gymExercise').value.trim();
+  if (!exercise) return alert('Enter an exercise name');
+  state.gym.unshift({
+    id: Date.now(),
+    exercise,
+    sets: document.getElementById('gymSets').value,
+    reps: document.getElementById('gymReps').value,
+    weight: document.getElementById('gymWeight').value,
+    type: document.getElementById('gymType').value,
+    notes: document.getElementById('gymNotes').value,
+    date: new Date().toLocaleDateString()
+  });
+  save();
+  closeModal('gymModal');
+  clearForm(['gymExercise','gymSets','gymReps','gymWeight','gymNotes']);
+  renderGym();
+}
+
+function deleteGym(id) {
+  state.gym = state.gym.filter(g => g.id !== id);
+  save(); renderGym();
+}
+
+function renderGym() {
+  const totalWorkouts = [...new Set(state.gym.map(g => g.date))].length;
+  const totalSets = state.gym.reduce((s, g) => s + (parseInt(g.sets) || 0), 0);
+  const totalReps = state.gym.reduce((s, g) => s + (parseInt(g.sets) || 0) * (parseInt(g.reps) || 0), 0);
+
+  document.getElementById('gymStats').innerHTML = `
+    <div class="stat-card"><span class="stat-value" style="color:#b97fc7">${totalWorkouts}</span><div class="stat-label">Workout Days</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#b97fc7">${state.gym.length}</span><div class="stat-label">Exercises</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#b97fc7">${totalSets}</span><div class="stat-label">Total Sets</div></div>
+    <div class="stat-card"><span class="stat-value" style="color:#b97fc7">${totalReps}</span><div class="stat-label">Total Reps</div></div>
+  `;
+
+  const typeColors = {Chest:'#e87d7d',Back:'#7eb8d4',Legs:'#7ec4a0',Shoulders:'#e8b86d',Arms:'#b97fc7',Core:'#e8a87d',Cardio:'#d4b8e8','Full Body':'#f0eee8'};
+
+  document.getElementById('gymList').innerHTML = state.gym.length ?
+    state.gym.map(g => `
+      <div class="workout-set">
+        <span class="set-badge" style="background:${typeColors[g.type] || '#b97fc7'}22;color:${typeColors[g.type] || '#b97fc7'}">${g.type}</span>
+        <span style="flex:1;font-weight:500">${g.exercise}</span>
+        <span style="color:var(--muted);font-size:0.8rem">${g.sets || '—'} × ${g.reps || '—'}</span>
+        ${g.weight ? `<span style="color:#b97fc7;font-size:0.8rem;margin-left:8px">${g.weight}kg</span>` : ''}
+        <span style="color:var(--muted);font-size:0.73rem;margin-left:8px">${g.date}</span>
+        <button class="btn btn-danger" onclick="deleteGym(${g.id})">✕</button>
+      </div>
+    `).join('') : '<div class="empty-state"><div class="empty-icon">🏋️</div><p>No workouts logged yet. Hit the gym!</p></div>';
+}
+
+// ===================== FOOD =====================
+function addFood() {
+  const name = document.getElementById('foodName').value.trim();
+  if (!name) return alert('Enter a food name');
+  state.food.push({
+    id: Date.now(),
+    name,
+    meal: document.getElementById('foodMeal').value,
+    cal: parseInt(document.getElementById('foodCal').value) || 0,
+    protein: parseInt(document.getElementById('foodProtein').value) || 0,
+    carbs: parseInt(document.getElementById('foodCarbs').value) || 0,
+    fat: parseInt(document.getElementById('foodFat').value) || 0,
+    qty: document.getElementById('foodQty').value,
+    date: new Date().toLocaleDateString()
+  });
+  save();
+  closeModal('foodModal');
+  clearForm(['foodName','foodCal','foodProtein','foodCarbs','foodFat','foodQty']);
+  renderFood();
+}
+
+function deleteFood(id) {
+  state.food = state.food.filter(f => f.id !== id);
+  save(); renderFood();
+}
+
+function renderFood() {
+  const today = new Date().toLocaleDateString();
+  const todayFood = state.food.filter(f => f.date === today);
+  const totalCal = todayFood.reduce((s, f) => s + f.cal, 0);
+  const totalProtein = todayFood.reduce((s, f) => s + f.protein, 0);
+  const totalCarbs = todayFood.reduce((s, f) => s + f.carbs, 0);
+  const totalFat = todayFood.reduce((s, f) => s + f.fat, 0);
+  const calPct = Math.min(totalCal / state.calorieGoal * 100, 100);
+
+  document.getElementById('calorieCard').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Today's Calories</div>
+    <div class="calorie-ring">
+      <div class="ring-val" style="color:#e8a87d">${totalCal}</div>
+      <div class="ring-label">/ ${state.calorieGoal} kcal goal</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" style="width:${calPct}%;background:${calPct > 100 ? '#e87d7d' : '#e8a87d'}"></div></div>
+    <div class="progress-text"><span>${totalCal} eaten</span><span>${state.calorieGoal - totalCal > 0 ? (state.calorieGoal - totalCal) + ' remaining' : 'Goal reached!'}</span></div>
+    <button class="btn btn-ghost" style="margin-top:14px;width:100%;font-size:0.78rem" onclick="setCalGoal()">Set Calorie Goal</button>
+  `;
+
+  document.getElementById('macroCard').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Macros Today</div>
+    ${[['🥩 Protein', totalProtein, 'g', '#7eb8d4', 50], ['🌾 Carbs', totalCarbs, 'g', '#e8b86d', 200], ['🥑 Fat', totalFat, 'g', '#7ec4a0', 65]].map(([l, v, u, c, goal]) => `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:0.83rem;margin-bottom:5px">
+          <span>${l}</span><span style="color:${c}">${v}${u} / ${goal}${u}</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${Math.min(v/goal*100,100)}%;background:${c}"></div></div>
+      </div>
+    `).join('')}
+  `;
+
+  const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  document.getElementById('mealsLog').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Today's Meals</div>
+    ${meals.map(meal => {
+      const items = todayFood.filter(f => f.meal === meal);
+      if (!items.length) return '';
+      return `
+        <div class="meal-block">
+          <div class="meal-type">${meal}</div>
+          ${items.map(f => `
+            <div class="food-item">
+              <div>
+                <div style="font-weight:500">${f.name}</div>
+                ${f.qty ? `<div style="font-size:0.75rem;color:var(--muted)">${f.qty}</div>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:14px">
+                <div class="food-macros">
+                  <span>${f.cal} kcal</span>
+                  <span>P: ${f.protein}g</span>
+                  <span>C: ${f.carbs}g</span>
+                  <span>F: ${f.fat}g</span>
+                </div>
+                <button class="btn btn-danger" onclick="deleteFood(${f.id})">✕</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }).join('') || '<div class="empty-state"><div class="empty-icon">🍽️</div><p>Nothing logged today. Start eating!</p></div>'}
+  `;
+}
+
+function setCalGoal() {
+  const v = prompt('Enter daily calorie goal:', state.calorieGoal);
+  if (v && !isNaN(v)) { state.calorieGoal = parseInt(v); save(); renderFood(); }
+}
+
+// ===================== BIRTHDAYS =====================
+function addBirthday() {
+  const name = document.getElementById('bdayName').value.trim();
+  const date = document.getElementById('bdayDate').value.trim();
+  if (!name || !date) return alert('Name and date are required');
+  state.birthdays.push({
+    id: Date.now(),
+    name, date,
+    rel: document.getElementById('bdayRel').value,
+    gifts: document.getElementById('bdayGifts').value
+  });
+  save();
+  closeModal('bdayModal');
+  clearForm(['bdayName','bdayDate','bdayGifts']);
+  renderBirthdays();
+}
+
+function deleteBirthday(id) {
+  state.birthdays = state.birthdays.filter(b => b.id !== id);
+  save(); renderBirthdays();
+}
+
+function daysUntilBirthday(dateStr) {
+  const [m, d] = dateStr.split('-').map(Number);
+  const today = new Date();
+  let bday = new Date(today.getFullYear(), m - 1, d);
+  if (bday < today) bday.setFullYear(today.getFullYear() + 1);
+  const diff = Math.ceil((bday - today) / (1000*60*60*24));
+  return diff;
+}
+
+function getAvatarColor(name) {
+  const colors = ['#e8b86d','#7eb8d4','#b97fc7','#7ec4a0','#e8a87d','#e87d7d','#d4b8e8'];
+  return colors[name.charCodeAt(0) % colors.length];
+}
+
+function renderBirthdays() {
+  const sorted = [...state.birthdays].sort((a, b) => daysUntilBirthday(a.date) - daysUntilBirthday(b.date));
+  const upcoming = sorted.filter(b => daysUntilBirthday(b.date) <= 30);
+
+  document.getElementById('upcomingBdays').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Upcoming (Next 30 Days)</div>
+    ${upcoming.length ? upcoming.map(b => {
+      const days = daysUntilBirthday(b.date);
+      const cls = days === 0 ? 'today-badge' : days <= 7 ? 'soon' : 'later';
+      const label = days === 0 ? '🎂 Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`;
+      const c = getAvatarColor(b.name);
+      return `
+        <div class="birthday-item">
+          <div class="avatar" style="background:${c}22;color:${c}">${b.name[0].toUpperCase()}</div>
+          <div><div class="bday-name">${b.name}</div><div class="bday-date">📅 ${b.date} · ${b.rel}</div></div>
+          <span class="bday-countdown ${cls}">${label}</span>
+        </div>
+      `;
+    }).join('') : '<p style="color:var(--muted);font-size:0.85rem;padding:8px 0">No birthdays in the next 30 days 🎉</p>'}
+  `;
+
+  document.getElementById('bdayList').innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">All Birthdays (${state.birthdays.length})</div>
+    ${sorted.length ? sorted.map(b => {
+      const days = daysUntilBirthday(b.date);
+      const c = getAvatarColor(b.name);
+      return `
+        <div class="birthday-item">
+          <div class="avatar" style="background:${c}22;color:${c}">${b.name[0].toUpperCase()}</div>
+          <div style="flex:1">
+            <div class="bday-name">${b.name}</div>
+            <div class="bday-date">📅 ${b.date} · ${b.rel}${b.gifts ? ` · 🎁 ${b.gifts}` : ''}</div>
+          </div>
+          <span style="font-size:0.78rem;color:var(--muted);margin-right:10px">In ${days} days</span>
+          <button class="btn btn-danger" onclick="deleteBirthday(${b.id})">✕</button>
+        </div>
+      `;
+    }).join('') : '<div class="empty-state"><div class="empty-icon">🎂</div><p>No birthdays saved yet. Add some!</p></div>'}
+  `;
+}
+
+// ===================== UTILS =====================
+function clearForm(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+function renderAll() {
+  renderTodos();
+  renderExpenses();
+  renderHealth();
+  renderGym();
+  renderFood();
+  renderBirthdays();
+}
+
+// Initial render
+renderAll();
+
+// Seed demo data if empty
+if (state.todos.length === 0 && state.expenses.length === 0 && state.birthdays.length === 0) {
+  state.todos = [
+    {id:1, title:'Morning workout', priority:'high', category:'Health', time:'06:30', notes:'30 min cardio', done:false, date:new Date().toLocaleDateString()},
+    {id:2, title:'Review project proposal', priority:'med', category:'Work', time:'10:00', notes:'', done:false, date:new Date().toLocaleDateString()},
+    {id:3, title:'Call dentist for appointment', priority:'low', category:'Health', time:'', notes:'', done:true, date:new Date().toLocaleDateString()},
+    {id:4, title:'Buy groceries', priority:'med', category:'Personal', time:'18:00', notes:'Milk, fruits, vegetables', done:false, date:new Date().toLocaleDateString()},
+  ];
+  state.expenses = [
+    {id:1, name:'Monthly Salary', amount:65000, type:'income', category:'Salary', date:new Date().toISOString().slice(0,10)},
+    {id:2, name:'Grocery Shopping', amount:3200, type:'expense', category:'Food', date:new Date().toISOString().slice(0,10)},
+    {id:3, name:'Uber to office', amount:340, type:'expense', category:'Transport', date:new Date().toISOString().slice(0,10)},
+    {id:4, name:'Netflix subscription', amount:649, type:'expense', category:'Entertainment', date:new Date().toISOString().slice(0,10)},
+    {id:5, name:'Gym membership', amount:1500, type:'expense', category:'Health', date:new Date().toISOString().slice(0,10)},
+  ];
+  state.birthdays = [
+    {id:1, name:'Mom', date:'03-12', rel:'Family', gifts:'Saree, jewelry'},
+    {id:2, name:'Rahul', date:'02-28', rel:'Friend', gifts:'Book on productivity'},
+    {id:3, name:'Priya', date:'04-05', rel:'Colleague', gifts:''},
+    {id:4, name:'Dad', date:'06-22', rel:'Family', gifts:'Watch'},
+  ];
+  const today = new Date().toLocaleDateString();
+  state.food = [
+    {id:1, name:'Oats with banana', meal:'Breakfast', cal:320, protein:12, carbs:55, fat:6, qty:'1 bowl', date:today},
+    {id:2, name:'Dal rice + sabzi', meal:'Lunch', cal:580, protein:22, carbs:85, fat:12, qty:'1 plate', date:today},
+    {id:3, name:'Almonds & walnuts', meal:'Snack', cal:180, protein:6, carbs:8, fat:16, qty:'handful', date:today},
+  ];
+  state.health = [{
+    id:1, date:today, weight:'72', steps:'7842', bp:'118/76', hr:'68', sleep:'7', water:'6', mood:'🙂 Good'
+  }];
+  state.gym = [
+    {id:1, exercise:'Bench Press', sets:'4', reps:'10', weight:'70', type:'Chest', notes:'Good form', date:today},
+    {id:2, exercise:'Incline Dumbbell Press', sets:'3', reps:'12', weight:'24', type:'Chest', notes:'', date:today},
+    {id:3, exercise:'Squats', sets:'4', reps:'8', weight:'100', type:'Legs', notes:'Personal best!', date:today},
+  ];
+  save();
+  renderAll();
+}
+
+
+// ===================== BLUEPRINT PILLARS DATA =====================
+const BP_PILLARS = [
+  {id:"speaking",icon:"🗣️",title:"Public Speaking",color:"#7eb8d4",tasks:[
+    {id:"s1",task:"Join Toastmasters International",phase:"Year 1",hrs:2,due:"2026-04-12",priority:"high"},
+    {id:"s2",task:"Watch 1 TED Talk/week + analyse structure",phase:"Year 1",hrs:1,due:"2026-04-19",priority:"high"},
+    {id:"s3",task:"Record yourself on Intune topic — review filler words",phase:"Year 1",hrs:1,due:"2026-04-26",priority:"medium"},
+    {id:"s4",task:"Present at a local Microsoft User Group",phase:"Year 1",hrs:3,due:"2026-06-01",priority:"high"},
+    {id:"s5",task:"Complete Toastmasters Pathways Level 1",phase:"Year 1",hrs:10,due:"2026-08-01",priority:"high"},
+    {id:"s6",task:"Submit CFP to a virtual tech summit",phase:"Year 1",hrs:2,due:"2026-09-01",priority:"medium"},
+    {id:"s7",task:"Deliver 30-min talk at virtual summit",phase:"Year 1",hrs:5,due:"2026-10-01",priority:"high"},
+    {id:"s8",task:"Speak at a regional tech conference (45-min)",phase:"Year 1",hrs:8,due:"2026-12-01",priority:"high"},
+    {id:"s9",task:"Read: Talk Like TED — Carmine Gallo",phase:"Year 1",hrs:6,due:"2026-05-01",priority:"medium"},
+    {id:"s10",task:"Read: Never Split the Difference — Chris Voss",phase:"Year 1",hrs:6,due:"2026-06-15",priority:"medium"},
+  ]},
+  {id:"health",icon:"💪",title:"Health & Fitness",color:"#7ec4a0",tasks:[
+    {id:"h1",task:"Lock in 10PM bedtime + 5:30AM wake-up routine",phase:"Year 1",hrs:0,due:"2026-04-19",priority:"high"},
+    {id:"h2",task:"Start daily 30-min morning walk",phase:"Year 1",hrs:0.5,due:"2026-04-15",priority:"high"},
+    {id:"h3",task:"Drink 2.5–3L water daily (track for 30 days)",phase:"Year 1",hrs:0,due:"2026-05-12",priority:"high"},
+    {id:"h4",task:"Begin bodyweight training: push-ups, squats, plank",phase:"Year 1",hrs:0.5,due:"2026-04-19",priority:"high"},
+    {id:"h5",task:"Join a gym and start 3x/week program",phase:"Year 1",hrs:1,due:"2026-06-01",priority:"high"},
+    {id:"h6",task:"10-min walk after every meal",phase:"Year 1",hrs:0.5,due:"2026-05-01",priority:"medium"},
+    {id:"h7",task:"Track all workouts in journal/app for 90 days",phase:"Year 1",hrs:0.1,due:"2026-07-12",priority:"medium"},
+    {id:"h8",task:"Add progressive overload to gym routine",phase:"Year 1",hrs:1,due:"2026-09-01",priority:"medium"},
+    {id:"h9",task:"Annual health check-up + blood panel",phase:"Year 1",hrs:2,due:"2026-06-01",priority:"high"},
+  ]},
+  {id:"nutrition",icon:"🥗",title:"Nutrition",color:"#e8a87d",tasks:[
+    {id:"n1",task:"Meal prep every Sunday (proteins + grains + veg)",phase:"Year 1",hrs:2,due:"2026-04-19",priority:"high"},
+    {id:"n2",task:"Eliminate processed food Mon–Fri for 30 days",phase:"Year 1",hrs:0,due:"2026-05-12",priority:"high"},
+    {id:"n3",task:"Replace sugary drinks with water + black coffee",phase:"Year 1",hrs:0,due:"2026-04-19",priority:"high"},
+    {id:"n4",task:"Learn 5 high-protein meal prep recipes",phase:"Year 1",hrs:3,due:"2026-05-01",priority:"medium"},
+    {id:"n5",task:"Track macros for 2 weeks (awareness only)",phase:"Year 1",hrs:0.5,due:"2026-05-26",priority:"medium"},
+    {id:"n6",task:"Eat a protein-rich breakfast daily for 60 days",phase:"Year 1",hrs:0,due:"2026-06-12",priority:"high"},
+  ]},
+  {id:"time",icon:"⏰",title:"Time Management",color:"#b97fc7",tasks:[
+    {id:"t1",task:"Set up Google Calendar with time blocks for every hour",phase:"Year 1",hrs:1,due:"2026-04-14",priority:"high"},
+    {id:"t2",task:"Write 3 MITs (Most Important Tasks) every night",phase:"Ongoing",hrs:0.1,due:"2026-12-31",priority:"high"},
+    {id:"t3",task:"Install a Pomodoro timer — use for all deep work",phase:"Year 1",hrs:0,due:"2026-04-15",priority:"high"},
+    {id:"t4",task:"Limit social media to 30 min/day",phase:"Year 1",hrs:0,due:"2026-04-19",priority:"high"},
+    {id:"t5",task:"Weekly Sunday review: 45-min calendar + goals",phase:"Ongoing",hrs:0.75,due:"2026-12-31",priority:"high"},
+    {id:"t6",task:"No phone for first 30 min after waking — 30-day challenge",phase:"Year 1",hrs:0,due:"2026-05-12",priority:"high"},
+    {id:"t7",task:"Read: Atomic Habits — James Clear",phase:"Year 1",hrs:5,due:"2026-05-15",priority:"high"},
+  ]},
+  {id:"money",icon:"💰",title:"Money & Wealth",color:"#e8b86d",tasks:[
+    {id:"m1",task:"Open a dedicated investment/brokerage account",phase:"Year 1",hrs:2,due:"2026-04-30",priority:"high"},
+    {id:"m2",task:"Set up automatic savings transfer on payday (20%)",phase:"Year 1",hrs:1,due:"2026-04-30",priority:"high"},
+    {id:"m3",task:"Track every expense for 3 months",phase:"Year 1",hrs:0.5,due:"2026-07-12",priority:"high"},
+    {id:"m4",task:"Eliminate all high-interest debt within 6 months",phase:"Year 1",hrs:1,due:"2026-10-12",priority:"high"},
+    {id:"m5",task:"Build 1-month emergency fund",phase:"Year 1",hrs:0,due:"2026-07-01",priority:"high"},
+    {id:"m6",task:"Start investing in S&P 500 ETF (VOO/VTI) monthly",phase:"Year 1",hrs:1,due:"2026-05-30",priority:"high"},
+    {id:"m7",task:"Read: The Psychology of Money — Morgan Housel",phase:"Year 1",hrs:5,due:"2026-06-01",priority:"medium"},
+    {id:"m8",task:"Read: Rich Dad Poor Dad — Robert Kiyosaki",phase:"Year 1",hrs:5,due:"2026-05-15",priority:"medium"},
+    {id:"m9",task:"Register a business entity (consulting company)",phase:"Year 2",hrs:4,due:"2027-03-01",priority:"medium"},
+    {id:"m10",task:"Land first Intune consulting client ($100–200/hr)",phase:"Year 2",hrs:10,due:"2027-06-01",priority:"high"},
+    {id:"m11",task:"Create first digital product (Intune course/eBook)",phase:"Year 2",hrs:40,due:"2027-09-01",priority:"medium"},
+  ]},
+  {id:"tech",icon:"💻",title:"Technology & Learning",color:"#7eb8d4",tasks:[
+    {id:"tc1",task:"Register for MD-102 exam",phase:"Year 1",hrs:0.5,due:"2026-04-20",priority:"high"},
+    {id:"tc2",task:"Set up free Intune trial tenant + Azure AD lab",phase:"Year 1",hrs:2,due:"2026-04-20",priority:"high"},
+    {id:"tc3",task:"Complete MD-102 study schedule (12 weeks)",phase:"Year 1",hrs:120,due:"2026-07-12",priority:"high"},
+    {id:"tc4",task:"Pass MD-102 exam",phase:"Year 1",hrs:3,due:"2026-07-31",priority:"high"},
+    {id:"tc5",task:"Pass SC-300 exam",phase:"Year 1",hrs:80,due:"2026-11-01",priority:"high"},
+    {id:"tc6",task:"Complete 1 Microsoft Learn module per day",phase:"Ongoing",hrs:0.5,due:"2026-12-31",priority:"high"},
+    {id:"tc7",task:"Publish 10+ GitHub repositories",phase:"Year 1",hrs:20,due:"2026-12-31",priority:"high"},
+    {id:"tc8",task:"Master Microsoft Graph API for Intune automation",phase:"Year 1",hrs:20,due:"2026-10-01",priority:"medium"},
+    {id:"tc9",task:"Start AI/ML fundamentals course (Andrew Ng, Coursera)",phase:"Year 2",hrs:30,due:"2027-06-01",priority:"medium"},
+  ]},
+  {id:"social",icon:"🌍",title:"Social & Networking",color:"#d4b8e8",tasks:[
+    {id:"so1",task:"Optimise LinkedIn profile (photo, bio, banner)",phase:"Year 1",hrs:2,due:"2026-04-20",priority:"high"},
+    {id:"so2",task:"Connect with 10 Microsoft MVPs on LinkedIn",phase:"Year 1",hrs:1,due:"2026-04-30",priority:"high"},
+    {id:"so3",task:"Join Microsoft Tech Community + post introduction",phase:"Year 1",hrs:1,due:"2026-04-20",priority:"high"},
+    {id:"so4",task:"Answer 10 questions on Microsoft Q&A this month",phase:"Ongoing",hrs:3,due:"2026-04-30",priority:"high"},
+    {id:"so5",task:"Find 1–2 mentors in the Intune/MVP community",phase:"Year 1",hrs:2,due:"2026-06-01",priority:"high"},
+    {id:"so6",task:"Attend 1 in-person Microsoft/tech event this year",phase:"Year 1",hrs:8,due:"2026-12-01",priority:"medium"},
+    {id:"so7",task:"Grow LinkedIn to 500+ targeted connections",phase:"Year 1",hrs:1,due:"2026-12-31",priority:"medium"},
+  ]},
+  {id:"knowledge",icon:"📚",title:"Knowledge",color:"#e87d7d",tasks:[
+    {id:"k1",task:"Read 20 pages every morning before work",phase:"Ongoing",hrs:0.5,due:"2026-12-31",priority:"high"},
+    {id:"k2",task:"Read: Sapiens — Yuval Noah Harari",phase:"Year 1",hrs:8,due:"2026-07-01",priority:"medium"},
+    {id:"k3",task:"Read: Zero to One — Peter Thiel",phase:"Year 1",hrs:4,due:"2026-06-01",priority:"high"},
+    {id:"k4",task:"Read: The Almanack of Naval Ravikant",phase:"Year 1",hrs:4,due:"2026-08-01",priority:"high"},
+    {id:"k5",task:"Read: Thinking Fast and Slow — Kahneman",phase:"Year 1",hrs:8,due:"2026-09-01",priority:"medium"},
+    {id:"k6",task:"Start a personal knowledge system (Notion/Obsidian)",phase:"Year 1",hrs:3,due:"2026-05-01",priority:"medium"},
+    {id:"k7",task:"Listen to 1 podcast/week on business or tech",phase:"Ongoing",hrs:1,due:"2026-12-31",priority:"low"},
+  ]},
+  {id:"balance",icon:"⚖️",title:"Work-Life Balance",color:"#7ec4a0",tasks:[
+    {id:"b1",task:"Define your non-negotiables (family, exercise, sleep)",phase:"Year 1",hrs:1,due:"2026-04-19",priority:"high"},
+    {id:"b2",task:"Schedule one full digital-free day per month",phase:"Ongoing",hrs:8,due:"2026-12-31",priority:"medium"},
+    {id:"b3",task:"Take all your annual leave — plan it now",phase:"Year 1",hrs:1,due:"2026-05-01",priority:"medium"},
+    {id:"b4",task:"Set work end-time alarm (6PM) and honor it daily",phase:"Year 1",hrs:0,due:"2026-04-19",priority:"high"},
+  ]},
+  {id:"mvp",icon:"🏆",title:"MVP & Billionaire Path",color:"#e8b86d",tasks:[
+    {id:"mv1",task:"Publish first blog post on Hashnode",phase:"Year 1",hrs:3,due:"2026-04-26",priority:"high"},
+    {id:"mv2",task:"Create Microsoft Tech Community blog post",phase:"Year 1",hrs:2,due:"2026-04-30",priority:"high"},
+    {id:"mv3",task:"Publish 2 blog posts per month for 12 months",phase:"Year 1",hrs:6,due:"2026-12-31",priority:"high"},
+    {id:"mv4",task:"Submit Microsoft MVP nomination",phase:"Year 1",hrs:4,due:"2026-12-31",priority:"high"},
+    {id:"mv5",task:"Set up GitHub profile with professional README",phase:"Year 1",hrs:2,due:"2026-04-20",priority:"high"},
+    {id:"mv6",task:"Write down 10 personal goals (1 per pillar)",phase:"Year 1",hrs:1,due:"2026-04-14",priority:"high"},
+    {id:"mv7",task:"Complete weekly Sunday review for 12 weeks straight",phase:"Year 1",hrs:0.75,due:"2026-07-05",priority:"high"},
+    {id:"mv8",task:"Identify a problem affecting 1M+ people (biz idea)",phase:"Year 2",hrs:5,due:"2027-06-01",priority:"medium"},
+    {id:"mv9",task:"Launch a SaaS or consulting business",phase:"Year 3",hrs:100,due:"2028-03-01",priority:"medium"},
+    {id:"mv10",task:"Reach 7-figure net worth trajectory milestone",phase:"Year 3",hrs:0,due:"2029-03-01",priority:"medium"},
+  ]},
+];
+
+const BP_PRI  = {high:{l:"High",c:"#e87d7d",bg:"#e87d7d18"},medium:{l:"Med",c:"#e8b86d",bg:"#e8b86d18"},low:{l:"Low",c:"#888",bg:"#88888818"}};
+const BP_PH   = {"Year 1":{c:"#7eb8d4"},"Year 2":{c:"#b97fc7"},"Year 3":{c:"#7ec4a0"},"Ongoing":{c:"#e8b86d"}};
+const BP_TOTAL = BP_PILLARS.reduce((a,p)=>a+p.tasks.length,0);
+
+// ── Blueprint State ──
+let bpState = {checked:{}, dueDates:{}, calAdded:{}, clientId:"", driveToken:"", driveFileId:null};
+let bpExpanded = {mvp:true};
+let bpFilter   = 'all';
+let bpDriveSaveTimer;
+
+function bpLoadLocal() {
+  try { const s=localStorage.getItem('bp_v3'); if(s) bpState={...bpState,...JSON.parse(s)}; } catch(e){}
+}
+function bpSaveLocal() {
+  try { localStorage.setItem('bp_v3', JSON.stringify(bpState)); } catch(e){}
+}
+function bpTriggerSave() {
+  bpSaveLocal();
+  clearTimeout(bpDriveSaveTimer);
+  bpDriveSaveTimer = setTimeout(bpDriveSave, 1000);
+  bpUpdateSyncPill('saving');
+}
+
+// ===================== UNIFIED GOOGLE DRIVE SYSTEM =====================
+// Stores ONE encrypted backup file: mylife_360_backup.json
+// Contains all app state + blueprint state, AES encrypted
+
+const DRIVE_BACKUP_FILENAME = 'mylife_360_backup.json';
+let driveToken     = null;   // OAuth access token (in-memory only)
+let driveFileId    = null;   // Drive file ID of backup
+let driveClientId  = '';     // OAuth client ID
+let driveAutosync  = true;   // auto-sync on every save
+let driveLastSync  = null;   // Date of last successful sync
+let driveSaveTimer = null;
+
+// ── Drive API helpers ──────────────────────────────────────────────────────
+async function driveApiCall(method, url, body, token) {
+  const headers = { Authorization: 'Bearer ' + (token || driveToken) };
+  if(body && typeof body === 'string') headers['Content-Type'] = 'application/json';
+  const res = await fetch(url, { method, headers, body: body || undefined });
+  if(!res.ok) throw new Error('Drive API ' + res.status);
+  const ct = res.headers.get('content-type') || '';
+  return ct.includes('json') ? res.json() : res.text();
+}
+
+async function driveFindFile(name, token) {
+  const q = encodeURIComponent("name='" + name + "' and trashed=false");
+  const d = await driveApiCall('GET',
+    'https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name,modifiedTime,size)',
+    null, token);
+  return d.files || [];
+}
+
+async function driveReadFile(fileId, token) {
+  const text = await driveApiCall('GET',
+    'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
+    null, token);
+  return typeof text === 'string' ? text : JSON.stringify(text);
+}
+
+async function driveWriteFile(fileId, content, filename, token) {
+  const body = typeof content === 'string' ? content : JSON.stringify(content);
+  if(fileId) {
+    // Update existing
+    await driveApiCall('PATCH',
+      'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media',
+      body, token);
+    return fileId;
+  } else {
+    // Create new
+    const meta = await driveApiCall('POST',
+      'https://www.googleapis.com/drive/v3/files',
+      JSON.stringify({ name: filename, mimeType: 'application/json' }), token);
+    await driveApiCall('PATCH',
+      'https://www.googleapis.com/upload/drive/v3/files/' + meta.id + '?uploadType=media',
+      body, token);
+    return meta.id;
+  }
+}
+
+async function driveDeleteFile(fileId, token) {
+  await fetch('https://www.googleapis.com/drive/v3/files/' + fileId, {
+    method: 'DELETE', headers: { Authorization: 'Bearer ' + (token || driveToken) }
+  });
+}
+
+// ── Connect ────────────────────────────────────────────────────────────────
+function driveClientIdChanged() {
+  driveClientId = document.getElementById('bp-client-id')?.value.trim() || '';
+  // persist client id in bpState so it survives re-login
+  bpState.driveClientId = driveClientId;
+  // Also store in plain key so new-browser restore can access it
+  if(driveClientId) localStorage.setItem('mylife_drive_cid', driveClientId);
+  bpSaveLocal();
+}
+
+async function driveConnect() {
+  const cid = (document.getElementById('bp-client-id')?.value || '').trim() || driveClientId;
+  if(!cid) { bpShowToast('⚠️ Paste your Google OAuth Client ID first'); return; }
+  driveClientId = cid; bpState.driveClientId = cid;
+  const redirect = location.href.split('?')[0].split('#')[0];
+  const params = new URLSearchParams({
+    client_id: cid,
+    redirect_uri: redirect,
+    response_type: 'token',
+    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events',
+    include_granted_scopes: 'true'
+  });
+  const popup = window.open('https://accounts.google.com/o/oauth2/v2/auth?' + params, '_blank', 'width=520,height=660');
+  driveUpdateStatus('connecting', '⏳ Connecting…');
+  const timer = setInterval(async () => {
+    try {
+      if(!popup || popup.closed) { clearInterval(timer); driveUpdateStatus('disconnected'); return; }
+      const hash = popup.location.hash;
+      if(hash.includes('access_token')) {
+        clearInterval(timer); popup.close();
+        const p = new URLSearchParams(hash.slice(1));
+        driveToken = p.get('access_token');
+        bpState.driveToken = driveToken;
+        if(driveClientId) localStorage.setItem('mylife_drive_cid', driveClientId);
+        driveUpdateStatus('syncing', '⏳ Connecting…');
+        try {
+          // Check for existing backup
+          const files = await driveFindFile(DRIVE_BACKUP_FILENAME, driveToken);
+          if(files.length > 0) {
+            driveFileId = files[0].id;
+            bpState.driveFileId = driveFileId;
+            // Ask user: restore from Drive or overwrite?
+            const restore = confirm(
+              'Found an existing backup on Drive!\n\n' +
+              'Last modified: ' + new Date(files[0].modifiedTime).toLocaleString() + '\n\n' +
+              'Click OK to RESTORE from Drive (recommended on a new device)\n' +
+              'Click Cancel to OVERWRITE Drive with current local data'
+            );
+            if(restore) {
+              await driveLoadLatest();
+            } else {
+              await driveSaveNow();
+            }
+          } else {
+            await driveSaveNow(); // first backup
+          }
+          bpSaveLocal();
+          driveUpdateStatus('connected');
+          driveListFiles();
+          driveRenderSettingsPanel();
+          bpShowToast('✅ Google Drive connected & synced!');
+        } catch(e) {
+          driveUpdateStatus('error', '❌ ' + e.message);
+        }
+      }
+    } catch(e) {}
+  }, 500);
+}
+
+function driveDisconnect() {
+  driveToken = null; driveFileId = null;
+  bpState.driveToken = null; bpState.driveFileId = null;
+  bpSaveLocal();
+  driveUpdateStatus('disconnected');
+  driveRenderSettingsPanel();
+  bpShowToast('Drive disconnected. Data remains saved locally.');
+}
+
+// ── Save to Drive ──────────────────────────────────────────────────────────
+async function driveSaveNow() {
+  if(!driveToken) { bpShowToast('⚠️ Connect Google Drive first'); return; }
+  driveUpdateHeaderPill('saving');
+  try {
+    // Build full encrypted backup payload
+    const payload = {
+      version: 3,
+      savedAt: new Date().toISOString(),
+      encryptedApp: localStorage.getItem('mylife_data_enc_v1') || '',
+      encryptedBP:  localStorage.getItem('mylife_bp_enc_v1')   || '',
+      // Also embed auth metadata (not the key — just username/salt/verifier)
+      auth: localStorage.getItem('mylife_auth_v1') || ''
+    };
+    driveFileId = await driveWriteFile(driveFileId, JSON.stringify(payload), DRIVE_BACKUP_FILENAME, driveToken);
+    bpState.driveFileId = driveFileId;
+    driveLastSync = new Date();
+    bpSaveLocal();
+    driveUpdateStatus('connected');
+    driveUpdateHeaderPill('saved');
+    driveUpdateLastSync();
+    setTimeout(() => driveUpdateHeaderPill('idle'), 3000);
+  } catch(e) {
+    driveUpdateHeaderPill('error');
+    bpShowToast('❌ Drive save failed: ' + e.message);
+  }
+}
+
+// ── Load from Drive ────────────────────────────────────────────────────────
+async function driveLoadLatest() {
+  if(!driveToken) { bpShowToast('⚠️ Connect Google Drive first'); return; }
+  driveUpdateStatus('syncing', '⏳ Restoring from Drive…');
+  try {
+    const files = await driveFindFile(DRIVE_BACKUP_FILENAME, driveToken);
+    if(!files.length) { bpShowToast('No backup found on Drive'); driveUpdateStatus('connected'); return; }
+    driveFileId = files[0].id;
+    const raw = await driveReadFile(driveFileId, driveToken);
+    const payload = JSON.parse(raw);
+
+    // Restore encrypted data to localStorage
+    if(payload.encryptedApp) localStorage.setItem('mylife_data_enc_v1', payload.encryptedApp);
+    if(payload.encryptedBP)  localStorage.setItem('mylife_bp_enc_v1',  payload.encryptedBP);
+    if(payload.auth)         localStorage.setItem('mylife_auth_v1',    payload.auth);
+
+    // Re-decrypt into memory
+    await authLoadEncryptedState();
+    renderAll();
+    if(typeof bpRenderAll === 'function') bpRenderAll();
+
+    driveLastSync = new Date();
+    driveUpdateStatus('connected');
+    driveUpdateLastSync();
+    bpShowToast('✅ Data restored from Drive!');
+  } catch(e) {
+    driveUpdateStatus('error', '❌ Restore failed');
+    bpShowToast('❌ Restore failed: ' + e.message);
+  }
+}
+
+// ── List Drive files ───────────────────────────────────────────────────────
+async function driveListFiles() {
+  const el = document.getElementById('drive-files-list'); if(!el) return;
+  if(!driveToken) { el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">Not connected</div>'; return; }
+  el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">Loading…</div>';
+  try {
+    const files = await driveFindFile(DRIVE_BACKUP_FILENAME, driveToken);
+    if(!files.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No backup found yet. Click "Save to Drive Now".</div>';
+      return;
+    }
+    el.innerHTML = files.map(f => {
+      const mod = new Date(f.modifiedTime).toLocaleString();
+      const size = f.size ? (f.size / 1024).toFixed(1) + ' KB' : '';
+      return `<div class="drive-file-row">
+        <div class="drive-file-icon">📄</div>
+        <div style="flex:1">
+          <div class="drive-file-name">${f.name}</div>
+          <div class="drive-file-meta">Modified: ${mod}${size ? ' · ' + size : ''}</div>
+        </div>
+        <div class="drive-file-actions">
+          <button class="btn-sm btn-sm-ghost" onclick="driveLoadLatest()" title="Restore this backup">⬇️ Restore</button>
+          <button class="btn-sm btn-sm-danger" onclick="driveDeleteBackup('${f.id}')" title="Delete backup">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:#e87d7d;font-size:0.82rem">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+async function driveDeleteBackup(fileId) {
+  if(!confirm('Delete this backup from Google Drive?')) return;
+  try {
+    await driveDeleteFile(fileId, driveToken);
+    driveFileId = null; bpState.driveFileId = null;
+    driveListFiles();
+    bpShowToast('Backup deleted from Drive');
+  } catch(e) { bpShowToast('❌ Delete failed: ' + e.message); }
+}
+
+// ── Auto-sync toggle ───────────────────────────────────────────────────────
+function driveToggleAutosync(on) {
+  driveAutosync = on;
+  bpState.driveAutosync = on;
+  bpSaveLocal();
+}
+
+// ── Trigger auto-save ──────────────────────────────────────────────────────
+function driveTriggerAutosave() {
+  if(!driveToken || !driveAutosync) return;
+  clearTimeout(driveSaveTimer);
+  driveSaveTimer = setTimeout(driveSaveNow, 2000); // debounce 2s
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function driveUpdateStatus(status, customSub) {
+  const icon = {connected:'✅',connecting:'⏳',syncing:'🔄',disconnected:'☁️',error:'⚠️'}[status]||'☁️';
+  const title = {connected:'Google Drive',connecting:'Connecting…',syncing:'Syncing…',disconnected:'Google Drive',error:'Sync Error'}[status]||'Google Drive';
+  const sub = customSub || {
+    connected:'Backup connected · auto-sync on',
+    connecting:'Opening Google sign-in…',
+    syncing:'Syncing your data…',
+    disconnected:'Not connected',
+    error:'Sync failed — check your connection'
+  }[status] || '';
+  const el_icon  = document.getElementById('dsc-icon');  if(el_icon) el_icon.textContent = icon;
+  const el_title = document.getElementById('dsc-title'); if(el_title) el_title.textContent = title;
+  const el_sub   = document.getElementById('dsc-sub');   if(el_sub) el_sub.textContent = sub;
+  const el_right = document.getElementById('dsc-right');
+  if(el_right) {
+    if(status === 'connected') {
+      el_right.innerHTML = '<button class="btn-sm btn-sm-ghost" onclick="driveSaveNow()">☁️ Sync Now</button><button class="btn-sm btn-sm-danger" onclick="driveDisconnect()">Disconnect</button>';
+    } else if(status === 'disconnected') {
+      el_right.innerHTML = '<button class="btn-sm btn-sm-primary" onclick="driveConnect()">Connect Drive</button>';
+    } else {
+      el_right.innerHTML = '<span style="color:var(--muted);font-size:0.8rem">' + icon + '</span>';
+    }
+  }
+  // Show/hide connected panel
+  const cp = document.getElementById('drive-connected-panel');
+  const sp = document.getElementById('drive-setup-panel');
+  if(cp) cp.style.display = status === 'connected' ? 'block' : 'none';
+  if(sp) sp.style.display = status === 'connected' ? 'none' : 'block';
+}
+
+function driveUpdateHeaderPill(state) {
+  const pill = document.getElementById('drive-header-pill'); if(!pill) return;
+  const m = {
+    saving: {t:'☁️ Saving…', c:'#e8b86d'},
+    saved:  {t:'☁️ Saved',   c:'#7ec4a0'},
+    error:  {t:'⚠️ Sync error', c:'#e87d7d'},
+    idle:   {t:'☁️ Drive',   c:'#7ec4a0'},
+  };
+  const s = m[state] || m.idle;
+  pill.textContent = s.t; pill.style.color = s.c; pill.style.background = s.c + '18';
+  pill.style.display = driveToken ? 'inline-flex' : 'none';
+}
+
+function driveUpdateLastSync() {
+  const el = document.getElementById('drive-last-sync'); if(!el) return;
+  el.textContent = driveLastSync ? 'Last synced: ' + driveLastSync.toLocaleString() : 'Last synced: Never';
+}
+
+function driveRenderSettingsPanel() {
+  const ci = document.getElementById('bp-client-id');
+  if(ci && driveClientId) ci.value = driveClientId;
+  const as = document.getElementById('drive-autosync');
+  if(as) as.checked = driveAutosync;
+  const ru = document.getElementById('redirect-uri-display');
+  if(ru) ru.textContent = location.href.split('?')[0].split('#')[0];
+  driveUpdateStatus(driveToken ? 'connected' : 'disconnected');
+  driveUpdateLastSync();
+  if(driveToken) driveListFiles();
+  driveUpdateHeaderPill(driveToken ? 'idle' : 'none');
+}
+
+// ── Legacy stubs so old bp-specific calls don't break ─────────────────────
+function bpUpdateSyncPill(s) {/* replaced by driveUpdateHeaderPill */}
+function bpSaveSettings() { driveClientIdChanged(); }
+function bpConnectDrive() { driveConnect(); }
+function bpDisconnectDrive() { driveDisconnect(); }
+
+// ── Calendar ──
+function bpAddToCalendar(taskId,pillarId){
+  const p=BP_PILLARS.find(x=>x.id===pillarId), t=p.tasks.find(x=>x.id===taskId);
+  const dd=bpState.dueDates[taskId]||t.due;
+  const eh=Math.max(t.hrs,0.5);
+  const st=new Date(dd+'T09:00:00'), en=new Date(st.getTime()+eh*3600000);
+  const f=d=>d.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const url='https://calendar.google.com/calendar/render?action=TEMPLATE'+
+    '&text='+encodeURIComponent('['+p.icon+' '+p.title+'] '+t.task)+
+    '&dates='+f(st)+'/'+f(en)+
+    '&details='+encodeURIComponent('Pillar: '+p.title+'\nPhase: '+t.phase+'\nPriority: '+t.priority+'\nTime: '+t.hrs+'h\n\nLife Mastery Blueprint');
+  window.open(url,'_blank');
+  bpState.calAdded[taskId]=true; bpTriggerSave(); bpRenderAll();
+  bpShowToast('📅 Opened in Google Calendar!');
+}
+function bpAddAllHighToCalendar(){
+  const high=BP_PILLARS.flatMap(p=>p.tasks.filter(t=>t.priority==='high'&&!bpState.calAdded[t.id]).map(t=>({...t,pillar:p})));
+  high.slice(0,5).forEach(({id,pillar})=>bpAddToCalendar(id,pillar.id));
+  bpShowToast('📅 Opened '+Math.min(high.length,5)+' tasks in Google Calendar');
+}
+function bpAddPillarToCalendar(pid){
+  const p=BP_PILLARS.find(x=>x.id===pid);
+  p.tasks.filter(t=>!bpState.calAdded[t.id]).slice(0,3).forEach(t=>bpAddToCalendar(t.id,pid));
+}
+
+// ── Toast ──
+let bpToastT;
+function bpShowToast(msg){
+  const el=document.getElementById('bpToast'); if(!el)return;
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(bpToastT); bpToastT=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+// ── Utils ──
+function bpToday(){return new Date().toISOString().split('T')[0];}
+function bpHrs(h){return h<1?h*60+'m':h+'h';}
+function bpRing(pct,color,size){
+  const r=(size-6)/2,c=2*Math.PI*r,d=(pct/100)*c;
+  return `<svg width="${size}" height="${size}" style="transform:rotate(-90deg)"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${d} ${c}" stroke-linecap="round" style="transition:stroke-dasharray .5s"/></svg>`;
+}
+
+// ── Render Hero ──
+function bpRenderHero(){
+  const done=Object.values(bpState.checked).filter(Boolean).length;
+  const pct=BP_TOTAL?Math.round(done/BP_TOTAL*100):0;
+  const circ=2*Math.PI*33, dash=(pct/100)*circ;
+  const hr=document.getElementById('bp-hero-ring'); if(hr)hr.setAttribute('stroke-dasharray',dash+' '+circ);
+  const hp=document.getElementById('bp-hero-pct');  if(hp)hp.textContent=pct+'%';
+  const hs=document.getElementById('bp-hero-sub');  if(hs)hs.textContent='3-Year Transformation · '+done+' of '+BP_TOTAL+' tasks done';
+  const tod=bpToday();
+  const ovr=BP_PILLARS.flatMap(p=>p.tasks).filter(t=>!bpState.checked[t.id]&&(bpState.dueDates[t.id]||t.due)<tod).length;
+  const hb=document.getElementById('bp-hero-badges');
+  if(hb){
+    let b='';
+    if(ovr>0) b+=`<span class="mvp-badge" style="color:#e87d7d;background:#e87d7d18">⚠ ${ovr} Overdue</span>`;
+    const st=bpState.driveToken?'idle':'notoken';
+    const sm={idle:{t:'Drive synced',c:'#7ec4a0'},notoken:{t:'Connect Drive',c:'#b97fc7'}};
+    const sx=sm[st];
+    b+=`<span class="mvp-badge" style="color:${sx.c};background:${sx.c}18">${sx.t}</span>`;
+    hb.innerHTML=b;
+  }
+  const ps=document.getElementById('bp-phase-strip');
+  if(ps){
+    ps.innerHTML=["Year 1","Year 2","Year 3","Ongoing"].map(ph=>{
+      const ts=BP_PILLARS.flatMap(p=>p.tasks).filter(t=>t.phase===ph);
+      const d=ts.filter(t=>bpState.checked[t.id]).length;
+      const p2=ts.length?Math.round(d/ts.length*100):0;
+      const col=BP_PH[ph].c;
+      return `<div class="phase-chip"><div class="pc-name">${ph}</div><div class="pc-pct" style="color:${col}">${p2}%</div><div class="pc-bar"><div class="pc-fill" style="width:${p2}%;background:${col}"></div></div><div class="pc-sub">${d}/${ts.length}</div></div>`;
+    }).join('');
+  }
+}
+
+// ── Render Dashboard ──
+function bpRenderDashboard(){
+  const search=(document.getElementById('bp-search')?.value||'').toLowerCase();
+  const tod=bpToday(), list=document.getElementById('bp-pillar-list');
+  if(!list)return;
+  let html='';
+  BP_PILLARS.forEach(p=>{
+    let tasks=p.tasks;
+    if(search) tasks=tasks.filter(t=>t.task.toLowerCase().includes(search));
+    if(bpFilter==='pending') tasks=tasks.filter(t=>!bpState.checked[t.id]);
+    else if(bpFilter==='done') tasks=tasks.filter(t=>bpState.checked[t.id]);
+    else if(bpFilter==='overdue') tasks=tasks.filter(t=>!bpState.checked[t.id]&&(bpState.dueDates[t.id]||t.due)<tod);
+    else if(bpFilter==='high') tasks=tasks.filter(t=>t.priority==='high');
+    if(search&&tasks.length===0)return;
+    const allT=p.tasks, done=allT.filter(t=>bpState.checked[t.id]).length;
+    const pct=allT.length?Math.round(done/allT.length*100):0;
+    const isOpen=!!bpExpanded[p.id];
+    let rows='';
+    tasks.forEach(t=>{
+      const isDone=!!bpState.checked[t.id], dd=bpState.dueDates[t.id]||t.due;
+      const isOvr=!isDone&&dd<tod, pri=BP_PRI[t.priority], ph2=BP_PH[t.phase];
+      const calA=!!bpState.calAdded[t.id];
+      rows+=`<div class="bp-task-row${isDone?' done':''}">
+        <div class="bp-check${isDone?' checked':''}" style="--pc:${p.color}${isDone?';background:'+p.color+';border-color:'+p.color:''}" onclick="bpToggleTask('${t.id}','${p.id}')">${isDone?'✓':''}</div>
+        <div class="bp-task-content">
+          <div class="bp-task-name">${t.task}</div>
+          <div class="bp-tags">
+            <span class="bp-tag" style="color:${pri.c};background:${pri.bg}">${pri.l}</span>
+            <span class="bp-tag" style="color:${ph2.c};background:${ph2.c}18">${t.phase}</span>
+            <span class="bp-tag" style="color:#555;background:rgba(255,255,255,0.05)">⏱ ${bpHrs(t.hrs)}</span>
+            ${isOvr?'<span class="bp-tag" style="color:#e87d7d;background:#e87d7d18">⚠ Overdue</span>':''}
+          </div>
+        </div>
+        <div class="bp-task-meta">
+          <input type="date" class="${isOvr?'overdue':''}" value="${dd}" onchange="bpUpdateDue('${t.id}',this.value)"/>
+          <button class="btn-cal-add${calA?' added':''}" onclick="bpAddToCalendar('${t.id}','${p.id}')">${calA?'✓ In Cal':'📅 Add'}</button>
+        </div>
+      </div>`;
+    });
+    const ringHtml=bpRing(pct,p.color,40);
+    html+=`<div class="pillar-card">
+      <div class="pillar-header" style="border-bottom:${isOpen?'1px solid rgba(255,255,255,0.05)':'none'}" onclick="bpTogglePillar('${p.id}')">
+        <div class="pillar-icon-box" style="background:${p.color}18">${p.icon}</div>
+        <div><div class="pillar-title-text">${p.title}</div><div class="pillar-sub-text">${done}/${allT.length} complete</div></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+          <div class="mini-ring" style="width:40px;height:40px">${ringHtml}<div class="mini-ring-label" style="color:${p.color}">${pct}%</div></div>
+          <span class="pillar-chevron${isOpen?' open':''}">▾</span>
+        </div>
+      </div>
+      <div class="pillar-prog-bar"><div class="pillar-prog-fill" style="width:${pct}%;background:${p.color}"></div></div>
+      <div class="pillar-task-list${isOpen?' open':''}" id="bptl-${p.id}">
+        ${tasks.length===0?'<div class="empty-state" style="padding:20px"><p>No tasks match this filter.</p></div>':rows}
+      </div>
+    </div>`;
+  });
+  list.innerHTML=html;
+}
+
+// ── Render Overview ──
+function bpRenderOverview(){
+  const og=document.getElementById('bp-overview-grid'); if(!og)return;
+  og.innerHTML=BP_PILLARS.map(p=>{
+    const done=p.tasks.filter(t=>bpState.checked[t.id]).length, pct=p.tasks.length?Math.round(done/p.tasks.length*100):0;
+    return `<div class="ov-card">
+      <div class="ov-card-top">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:1.1rem">${p.icon}</span><span style="font-weight:600;font-size:0.85rem;color:var(--text)">${p.title}</span></div>
+        <span style="font-family:'Playfair Display',serif;font-size:1.1rem;color:${p.color}">${pct}%</span>
+      </div>
+      <div class="ov-prog"><div class="ov-prog-fill" style="width:${pct}%;background:${p.color}"></div></div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:7px">${done} of ${p.tasks.length} tasks</div>
+    </div>`;
+  }).join('');
+  const po=document.getElementById('bp-phase-overview'); if(!po)return;
+  po.innerHTML='<div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">By Phase</div>'+
+  ["Year 1","Year 2","Year 3","Ongoing"].map(ph=>{
+    const ts=BP_PILLARS.flatMap(p=>p.tasks).filter(t=>t.phase===ph);
+    const d=ts.filter(t=>bpState.checked[t.id]).length, p2=ts.length?Math.round(d/ts.length*100):0, c=BP_PH[ph].c;
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:0.83rem;font-weight:600;color:${c}">${ph}</span><span style="font-size:0.75rem;color:var(--muted)">${d}/${ts.length} · ${p2}%</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${p2}%;background:${c}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render Upcoming ──
+function bpRenderUpcoming(){
+  const el=document.getElementById('bp-upcoming-content'); if(!el)return;
+  const tod=bpToday();
+  const all=BP_PILLARS.flatMap(p=>p.tasks.map(t=>({...t,pillar:p})));
+  const pending=all.filter(t=>!bpState.checked[t.id]).sort((a,b)=>(bpState.dueDates[a.id]||a.due).localeCompare(bpState.dueDates[b.id]||b.due));
+  const overdue=pending.filter(t=>(bpState.dueDates[t.id]||t.due)<tod);
+  const upcoming=pending.filter(t=>(bpState.dueDates[t.id]||t.due)>=tod).slice(0,40);
+  let html='';
+  if(overdue.length){
+    html+=`<div style="font-size:0.8rem;font-weight:600;color:#e87d7d;margin-bottom:10px">⚠ Overdue (${overdue.length})</div>`;
+    overdue.forEach(t=>{
+      const dd=bpState.dueDates[t.id]||t.due;
+      html+=`<div class="upco-row overdue">
+        <div onclick="bpToggleTask('${t.id}','${t.pillar.id}')" style="width:20px;height:20px;border-radius:6px;border:2px solid #e87d7d;cursor:pointer;flex-shrink:0"></div>
+        <div style="flex:1"><div style="font-size:0.85rem;font-weight:500">${t.task}</div><div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${t.pillar.icon} ${t.pillar.title}</div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <input type="date" value="${dd}" onchange="bpUpdateDue('${t.id}',this.value)" style="font-size:0.7rem;background:var(--surface2);border:1px solid #e87d7d33;border-radius:7px;padding:3px 7px;color:#e87d7d;cursor:pointer;width:auto"/>
+          <button onclick="bpAddToCalendar('${t.id}','${t.pillar.id}')" class="btn-cal-add">📅 Cal</button>
+        </div>
+      </div>`;
+    });
+  }
+  html+=`<div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin:14px 0 10px">Next ${upcoming.length} Tasks</div>`;
+  upcoming.forEach(t=>{
+    const dd=bpState.dueDates[t.id]||t.due;
+    const days=Math.round((new Date(dd)-new Date(tod))/86400000);
+    const calA=!!bpState.calAdded[t.id];
+    html+=`<div class="upco-row normal">
+      <div onclick="bpToggleTask('${t.id}','${t.pillar.id}')" style="width:20px;height:20px;border-radius:6px;border:2px solid ${t.pillar.color};cursor:pointer;flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-size:0.85rem;font-weight:500">${t.task}</div><div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${t.pillar.icon} ${t.pillar.title} · ${bpHrs(t.hrs)}</div></div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:0.72rem;color:${days<=7?'#e8b86d':'var(--muted)'};${days<=7?'font-weight:600':''}">${days===0?'Today':days===1?'Tomorrow':days+'d'}</div>
+        <input type="date" value="${dd}" onchange="bpUpdateDue('${t.id}',this.value)" style="font-size:0.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:3px 6px;color:var(--muted);cursor:pointer;margin-top:3px;width:auto;display:block"/>
+        <button onclick="bpAddToCalendar('${t.id}','${t.pillar.id}')" class="btn-cal-add${calA?' added':''}" style="margin-top:3px">${calA?'✓':'📅 Add'}</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ── Render Calendar tab ──
+function bpRenderCalendar(){
+  const cg=document.getElementById('bp-cal-grid'); if(!cg)return;
+  cg.innerHTML=BP_PILLARS.map(p=>{
+    const pending=p.tasks.filter(t=>!bpState.calAdded[t.id]).length;
+    return `<div class="cal-pillar-box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:1rem">${p.icon}</span><span class="cpb-title">${p.title}</span></div>
+      <div class="cpb-sub">${pending} tasks not yet added</div>
+      <button class="btn-add-pillar" style="background:${p.color}18;color:${p.color}" onclick="bpAddPillarToCalendar('${p.id}')">Add Top 3 to Calendar</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Render Settings ──
+function bpRenderSettings(){
+  driveRenderSettingsPanel();
+  const ds=document.getElementById('bp-data-stats');
+  if(ds){
+    const done=Object.values(bpState.checked).filter(Boolean).length;
+    const dd=Object.values(bpState.dueDates).filter(Boolean).length;
+    const cal=Object.values(bpState.calAdded).filter(Boolean).length;
+    const appTodos=(typeof state!=='undefined'&&state.todos)?state.todos.length:0;
+    const appExp=(typeof state!=='undefined'&&state.expenses)?state.expenses.length:0;
+    ds.textContent=appTodos+' tasks · '+appExp+' transactions · '+done+'/'+BP_TOTAL+' blueprint tasks · '+cal+' calendar events';
+  }
+  const ab=document.getElementById('bp-about-text');
+  if(ab) ab.textContent='MyLife 360° combines your personal organizer (to-dos, expenses, health, gym, food, birthdays) with your 3-year MVP Life Mastery Blueprint — '+BP_TOTAL+' tasks across 10 pillars. AES-256 encrypted locally, backed up to your Google Drive in real time.';
+}
+
+// ── Interactions ──
+function bpToggleTask(id,pid){
+  bpState.checked[id]=!bpState.checked[id];
+  bpTriggerSave(); bpRenderAll();
+}
+function bpUpdateDue(id,val){
+  bpState.dueDates[id]=val; bpTriggerSave(); bpRenderAll();
+}
+function bpTogglePillar(id){
+  bpExpanded[id]=!bpExpanded[id]; bpRenderDashboard();
+}
+function bpExpandAll(){ BP_PILLARS.forEach(p=>bpExpanded[p.id]=true); bpRenderDashboard(); }
+function bpCollapseAll(){ bpExpanded={}; bpRenderDashboard(); }
+function bpSetFilter(f,btn){
+  bpFilter=f;
+  document.querySelectorAll('.mvp-fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  bpRenderDashboard();
+}
+function bpExportData(){ exportFullBackup(); }
+
+function exportFullBackup(){
+  const payload = {
+    version: 3,
+    exportedAt: new Date().toISOString(),
+    encryptedApp: localStorage.getItem('mylife_data_enc_v1') || '',
+    encryptedBP:  localStorage.getItem('mylife_bp_enc_v1')   || '',
+    auth: localStorage.getItem('mylife_auth_v1') || ''
+  };
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+  a.download='mylife_360_backup_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  bpShowToast('✅ Full encrypted backup exported!');
+}
+
+function fullReset(){
+  if(confirm('This will delete ALL data including login credentials. Are you sure?')) {
+    authHardReset();
+  }
+}
+function bpImportData(){ document.getElementById('bp-import-file').click(); }
+function bpHandleImport(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.checked)bpState.checked={...bpState.checked,...d.checked};if(d.dueDates)bpState.dueDates={...bpState.dueDates,...d.dueDates};if(d.calAdded)bpState.calAdded={...bpState.calAdded,...d.calAdded};bpTriggerSave();bpRenderAll();bpShowToast('✅ Data imported!');}catch(err){bpShowToast('❌ Invalid file');}};
+  r.readAsText(f);
+}
+function bpResetData(){ if(confirm('Reset ALL Blueprint progress?')){bpState.checked={};bpState.dueDates={};bpState.calAdded={};bpTriggerSave();bpRenderAll();bpShowToast('🗑 Progress reset');} }
+
+// ── Render All ──
+function bpRenderAll(){
+  bpRenderHero();
+  bpRenderDashboard();
+  bpRenderOverview();
+  bpRenderUpcoming();
+  bpRenderCalendar();
+  bpRenderSettings();
+}
+
+// ── Init ──
+bpLoadLocal();
+bpUpdateSyncPill(bpState.driveToken?'idle':'notoken');
+bpRenderAll();
+
+
+
+// ===================== AUTH SYSTEM =====================
+// Uses PBKDF2 (SHA-256, 200k iterations) for key derivation
+// AES-GCM 256-bit for all data encryption
+// Session timeout: 30 minutes of inactivity
+
+const AUTH_KEY     = 'mylife_auth_v1';       // stores: {username, salt, hash, verifier}
+const DATA_KEY_ENC = 'mylife_data_enc_v1';   // stores: encrypted app state
+const BP_DATA_ENC  = 'mylife_bp_enc_v1';     // stores: encrypted blueprint state
+const SESSION_KEY  = 'mylife_session_v1';    // stores: encrypted session token
+
+let authCryptoKey = null;        // in-memory only, cleared on lock
+let sessionTimer  = null;
+const SESSION_MINS = 30;
+
+// ── Crypto helpers ──────────────────────────────────────────────────────────
+function buf2hex(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function hex2buf(hex){ return new Uint8Array(hex.match(/.{2}/g).map(b=>parseInt(b,16))).buffer; }
+function buf2b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b642buf(b64){ return Uint8Array.from(atob(b64),c=>c.charCodeAt(0)).buffer; }
+function randBytes(n){ return crypto.getRandomValues(new Uint8Array(n)); }
+
+async function deriveKey(password, saltBuf) {
+  const enc = new TextEncoder();
+  const keyMat = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:saltBuf, iterations:200000, hash:'SHA-256' },
+    keyMat,
+    { name:'AES-GCM', length:256 },
+    false, ['encrypt','decrypt']
+  );
+}
+
+async function aesEncrypt(cryptoKey, data) {
+  const iv  = randBytes(12);
+  const enc = new TextEncoder();
+  const ct  = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, cryptoKey, enc.encode(JSON.stringify(data)));
+  return buf2b64(iv) + '.' + buf2b64(ct);
+}
+
+async function aesDecrypt(cryptoKey, token) {
+  const [ivB64, ctB64] = token.split('.');
+  const pt = await crypto.subtle.decrypt(
+    { name:'AES-GCM', iv: b642buf(ivB64) },
+    cryptoKey,
+    b642buf(ctB64)
+  );
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+// ── Password strength ───────────────────────────────────────────────────────
+function checkPwStrength(pw, barId='pw-strength') {
+  const bar = document.getElementById(barId); if(!bar)return;
+  let score=0;
+  if(pw.length>=8)score++; if(pw.length>=12)score++;
+  if(/[A-Z]/.test(pw))score++; if(/[0-9]/.test(pw))score++;
+  if(/[^A-Za-z0-9]/.test(pw))score++;
+  const colors=['#e87d7d','#e87d7d','#e8b86d','#e8a87d','#7ec4a0','#7ec4a0'];
+  const widths=['0%','25%','45%','65%','85%','100%'];
+  bar.style.background = colors[score];
+  bar.style.width = widths[score];
+}
+
+// ── Eye toggle ──────────────────────────────────────────────────────────────
+function toggleEye(inputId, btn) {
+  const el = document.getElementById(inputId); if(!el)return;
+  if(el.type==='password'){ el.type='text'; btn.textContent='🙈'; }
+  else { el.type='password'; btn.textContent='👁'; }
+}
+
+// ── View helpers ────────────────────────────────────────────────────────────
+function showView(name) {
+  ['view-setup','view-login','view-reset','view-loading'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  const el=document.getElementById('view-'+name); if(el)el.style.display='block';
+}
+function showLogin(){ showView('login'); }
+function showResetConfirm(){ showView('reset'); }
+
+// ── Setup (first time) ──────────────────────────────────────────────────────
+async function authSetup() {
+  const user    = document.getElementById('setup-user').value.trim();
+  const pass    = document.getElementById('setup-pass').value;
+  const confirm = document.getElementById('setup-confirm').value;
+  const hint    = document.getElementById('setup-hint');
+
+  if(!user){ hint.textContent='Username is required.'; return; }
+  if(pass.length < 6){ hint.textContent='Password must be at least 6 characters.'; return; }
+  if(pass !== confirm){ hint.textContent='Passwords do not match.'; return; }
+  hint.textContent='';
+
+  showView('loading');
+  document.getElementById('loading-msg').textContent='Setting up encryption…';
+
+  try {
+    const salt    = randBytes(32);
+    const cryptoKey = await deriveKey(pass, salt);
+
+    // Store verifier (encrypt a known string to verify password later)
+    const verifier = await aesEncrypt(cryptoKey, { verified: true, user });
+
+    localStorage.setItem(AUTH_KEY, JSON.stringify({
+      username: user,
+      salt: buf2b64(salt.buffer),
+      verifier
+    }));
+
+    authCryptoKey = cryptoKey;
+    await authEnterApp(user);
+  } catch(e) {
+    showView('setup');
+    document.getElementById('setup-hint').textContent = 'Setup failed: ' + e.message;
+  }
+}
+
+// ── Login ───────────────────────────────────────────────────────────────────
+let loginAttempts = 0;
+let loginLockUntil = 0;
+
+async function authLogin() {
+  const now = Date.now();
+  if(now < loginLockUntil) {
+    const secs = Math.ceil((loginLockUntil - now)/1000);
+    document.getElementById('login-error').textContent = '⏳ Too many attempts. Wait '+secs+'s.';
+    return;
+  }
+
+  const userIn = document.getElementById('login-user').value.trim();
+  const passIn = document.getElementById('login-pass').value;
+  const errEl  = document.getElementById('login-error');
+  const btn    = document.getElementById('login-btn');
+
+  errEl.textContent=''; btn.textContent='⏳ Verifying…'; btn.disabled=true;
+  showView('loading');
+  document.getElementById('loading-msg').textContent='Decrypting your data…';
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
+    if(!stored) throw new Error('No account found.');
+
+    if(stored.username.toLowerCase() !== userIn.toLowerCase()) throw new Error('Invalid username or password.');
+
+    const salt = b642buf(stored.salt);
+    const cryptoKey = await deriveKey(passIn, salt);
+
+    // Verify by decrypting the verifier
+    const vData = await aesDecrypt(cryptoKey, stored.verifier);
+    if(!vData.verified) throw new Error('Invalid password.');
+
+    loginAttempts = 0;
+    authCryptoKey = cryptoKey;
+    await authEnterApp(stored.username);
+  } catch(e) {
+    loginAttempts++;
+    if(loginAttempts >= 5) {
+      loginLockUntil = Date.now() + 30000;
+      loginAttempts = 0;
+    }
+    showView('login');
+    errEl.textContent = '❌ ' + (e.message === 'The operation failed for an operation-specific reason.' ? 'Invalid username or password.' : e.message);
+    btn.textContent='🔓 Unlock MyLife'; btn.disabled=false;
+  }
+}
+
+// ── Enter App ───────────────────────────────────────────────────────────────
+async function authEnterApp(username) {
+  // Decrypt and restore app state
+  await authLoadEncryptedState();
+
+  // Show app
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-header').style.display='flex';
+  document.getElementById('app-wrapper').style.display='flex';
+  document.getElementById('app-wrapper').style.flexDirection='column';
+  document.getElementById('app-wrapper').style.flex='1';
+
+  // User pill
+  const pill = document.getElementById('auth-user-pill');
+  if(pill) pill.innerHTML='👤 ' + username;
+
+  // Restore Drive connection state
+  driveClientId  = bpState.driveClientId  || '';
+  driveToken     = bpState.driveToken     || null;
+  driveFileId    = bpState.driveFileId    || null;
+  driveAutosync  = bpState.driveAutosync !== false;
+  if(driveToken) {
+    driveUpdateHeaderPill('idle');
+    driveUpdateStatus('connected');
+  }
+  // Start session timer
+  authResetSession();
+
+  renderAll();
+  if(typeof bpRenderAll==='function') bpRenderAll();
+}
+
+// ── Load encrypted state ────────────────────────────────────────────────────
+async function authLoadEncryptedState() {
+  // App state
+  const encApp = localStorage.getItem(DATA_KEY_ENC);
+  if(encApp && authCryptoKey) {
+    try {
+      const decrypted = await aesDecrypt(authCryptoKey, encApp);
+      // Merge into existing state object
+      Object.assign(state, decrypted);
+    } catch(e) { /* first time or key mismatch — start fresh */ }
+  } else {
+    // Try loading plain state for migration
+    const plain = localStorage.getItem('mylife_state');
+    if(plain) {
+      try { Object.assign(state, JSON.parse(plain)); } catch(e){}
+    }
+  }
+
+  // BP state
+  const encBP = localStorage.getItem(BP_DATA_ENC);
+  if(encBP && authCryptoKey) {
+    try {
+      const decrypted = await aesDecrypt(authCryptoKey, encBP);
+      Object.assign(bpState, decrypted);
+    } catch(e) {}
+  } else {
+    const plain = localStorage.getItem('bp_v3');
+    if(plain) {
+      try { Object.assign(bpState, JSON.parse(plain)); } catch(e){}
+    }
+  }
+}
+
+// ── Save (encrypted) ────────────────────────────────────────────────────────
+async function authSaveEncrypted() {
+  if(!authCryptoKey) return;
+  try {
+    const encApp = await aesEncrypt(authCryptoKey, state);
+    localStorage.setItem(DATA_KEY_ENC, encApp);
+    // Remove any plaintext fallback
+    localStorage.removeItem('mylife_state');
+
+    const encBP = await aesEncrypt(authCryptoKey, bpState);
+    localStorage.setItem(BP_DATA_ENC, encBP);
+    localStorage.removeItem('bp_v3');
+    // Trigger Drive autosave after local save
+    driveTriggerAutosave();
+  } catch(e) { console.warn('Encrypt save failed', e); }
+}
+
+// Override the existing save() and bpSaveLocal() to use encryption
+const _origSave = save;
+save = function() { authSaveEncrypted(); };
+
+const _origBpSaveLocal = bpSaveLocal;
+bpSaveLocal = function() { authSaveEncrypted(); };
+
+// ── Lock ────────────────────────────────────────────────────────────────────
+function authLock() {
+  // Save before locking
+  authSaveEncrypted().then(()=>{
+    authCryptoKey = null;
+    clearTimeout(sessionTimer);
+    // Clear sensitive DOM
+    document.getElementById('app-header').style.display='none';
+    document.getElementById('app-wrapper').style.display='none';
+    document.getElementById('auth-screen').classList.remove('hidden');
+    document.getElementById('login-pass').value='';
+    document.getElementById('login-error').textContent='';
+    document.getElementById('session-bar').style.transform='scaleX(0)';
+    showLogin();
+  });
+}
+
+// ── Session timer ───────────────────────────────────────────────────────────
+function authResetSession() {
+  clearTimeout(sessionTimer);
+  const bar = document.getElementById('session-bar');
+  if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(1)'; bar.offsetHeight; bar.style.transition='transform '+(SESSION_MINS*60)+'s linear'; bar.style.transform='scaleX(0)'; }
+  sessionTimer = setTimeout(()=>{
+    authLock();
+    showLogin();
+    document.getElementById('login-error').textContent='⏱ Session expired. Please log in again.';
+  }, SESSION_MINS * 60 * 1000);
+}
+['click','keydown','mousemove','touchstart'].forEach(e=>{
+  document.addEventListener(e, ()=>{ if(authCryptoKey) authResetSession(); }, { passive:true });
+});
+
+// ── Change Password ──────────────────────────────────────────────────────────
+async function authChangePw() {
+  const cur  = document.getElementById('cp-current').value;
+  const nw   = document.getElementById('cp-new').value;
+  const conf = document.getElementById('cp-confirm').value;
+  const err  = document.getElementById('cp-error');
+  err.textContent='';
+
+  if(nw.length < 6){ err.textContent='New password must be at least 6 characters.'; return; }
+  if(nw !== conf)  { err.textContent='Passwords do not match.'; return; }
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
+    const saltBuf = b642buf(stored.salt);
+    // Verify current password
+    const oldKey = await deriveKey(cur, saltBuf);
+    await aesDecrypt(oldKey, stored.verifier); // throws if wrong
+
+    // Generate new salt + key
+    const newSalt = randBytes(32);
+    const newKey  = await deriveKey(nw, newSalt);
+    const newVer  = await aesEncrypt(newKey, { verified:true, user:stored.username });
+
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ username:stored.username, salt:buf2b64(newSalt.buffer), verifier:newVer }));
+
+    // Re-encrypt all data with new key
+    authCryptoKey = newKey;
+    await authSaveEncrypted();
+
+    closeModal('changePwModal');
+    alert('✅ Password updated successfully!');
+  } catch(e) {
+    err.textContent = '❌ Current password is incorrect.';
+  }
+}
+
+// ── Hard Reset ───────────────────────────────────────────────────────────────
+function authHardReset() {
+  [AUTH_KEY, DATA_KEY_ENC, BP_DATA_ENC, SESSION_KEY, 'mylife_state','bp_v3'].forEach(k=>localStorage.removeItem(k));
+  authCryptoKey = null;
+  location.reload();
+}
+
+// ── Init Auth ────────────────────────────────────────────────────────────────
+
+// ── Setup tab toggle ────────────────────────────────────────────────────────
+function switchSetupTab(tab) {
+  document.getElementById('setup-panel-new').style.display     = tab === 'new'     ? 'block' : 'none';
+  document.getElementById('setup-panel-restore').style.display = tab === 'restore' ? 'block' : 'none';
+  document.getElementById('toggle-new').classList.toggle('active',     tab === 'new');
+  document.getElementById('toggle-restore').classList.toggle('active', tab === 'restore');
+}
+
+// ── Restore from Google Drive on a new browser ──────────────────────────────
+async function restoreFromDrive() {
+  const cid = (document.getElementById('restore-client-id')?.value || '').trim();
+  const hint = document.getElementById('restore-hint');
+  if(!cid) { hint.textContent = 'Paste your Google OAuth Client ID first.'; return; }
+  hint.textContent = '';
+
+  showView('loading');
+  document.getElementById('loading-msg').textContent = 'Connecting to Google Drive…';
+
+  // Open OAuth popup
+  const redirect = location.href.split('?')[0].split('#')[0];
+  const params = new URLSearchParams({
+    client_id: cid,
+    redirect_uri: redirect,
+    response_type: 'token',
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    include_granted_scopes: 'true'
+  });
+  const popup = window.open('https://accounts.google.com/o/oauth2/v2/auth?' + params, '_blank', 'width=520,height=660');
+
+  const timer = setInterval(async () => {
+    try {
+      if(!popup || popup.closed) {
+        clearInterval(timer);
+        showView('setup'); switchSetupTab('restore');
+        document.getElementById('restore-hint').textContent = 'Popup closed. Try again.';
+        return;
+      }
+      const hash = popup.location.hash;
+      if(hash.includes('access_token')) {
+        clearInterval(timer); popup.close();
+        const token = new URLSearchParams(hash.slice(1)).get('access_token');
+
+        document.getElementById('loading-msg').textContent = 'Fetching your backup from Drive…';
+
+        try {
+          // Find backup file
+          const q = encodeURIComponent("name='mylife_360_backup.json' and trashed=false");
+          const res = await fetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name,modifiedTime)', {
+            headers: { Authorization: 'Bearer ' + token }
+          });
+          const data = await res.json();
+          const files = data.files || [];
+
+          if(!files.length) {
+            showView('setup'); switchSetupTab('restore');
+            document.getElementById('restore-hint').textContent = '❌ No backup found on this Drive account. Create a new account instead.';
+            return;
+          }
+
+          document.getElementById('loading-msg').textContent = 'Restoring your data…';
+
+          // Download the backup
+          const fileRes = await fetch('https://www.googleapis.com/drive/v3/files/' + files[0].id + '?alt=media', {
+            headers: { Authorization: 'Bearer ' + token }
+          });
+          const payload = await fileRes.json();
+
+          // Restore encrypted data + auth credentials to localStorage
+          if(payload.encryptedApp) localStorage.setItem('mylife_data_enc_v1', payload.encryptedApp);
+          if(payload.encryptedBP)  localStorage.setItem('mylife_bp_enc_v1',  payload.encryptedBP);
+          if(payload.auth)         localStorage.setItem('mylife_auth_v1',    payload.auth);
+
+          // Also store client ID for future use
+          try {
+            const bpEnc = payload.encryptedBP;
+            if(bpEnc) {
+              // Store client id unencrypted in a helper key so it survives login
+              localStorage.setItem('mylife_drive_cid', cid);
+            }
+          } catch(e){}
+
+          // Now re-init auth — will find the restored credentials and show login
+          document.getElementById('loading-msg').textContent = 'Account restored! Please log in…';
+          await new Promise(r => setTimeout(r, 800));
+
+          // Re-run auth init logic
+          const stored = localStorage.getItem('mylife_auth_v1');
+          if(stored) {
+            const { username } = JSON.parse(stored);
+            showView('login');
+            const welcome = document.getElementById('auth-welcome');
+            if(welcome) welcome.textContent = 'Account restored! Welcome back, ' + username + ' 👋';
+            const lu = document.getElementById('login-user');
+            if(lu) lu.value = username;
+            // Pre-fill client id
+            const ci = document.getElementById('bp-client-id');
+            if(ci) ci.value = cid;
+            bpShowToast('✅ Account restored from Drive! Enter your password to unlock.');
+          } else {
+            showView('setup'); switchSetupTab('restore');
+            document.getElementById('restore-hint').textContent = '❌ Backup found but credentials missing. Contact support.';
+          }
+
+        } catch(e) {
+          showView('setup'); switchSetupTab('restore');
+          document.getElementById('restore-hint').textContent = '❌ Restore failed: ' + e.message;
+        }
+      }
+    } catch(e) { /* cross-origin — popup not yet on redirect page */ }
+  }, 500);
+}
+
+(function authInit() {
+  const stored = localStorage.getItem(AUTH_KEY);
+  if(stored) {
+    const { username } = JSON.parse(stored);
+    showView('login');
+    const welcome = document.getElementById('auth-welcome');
+    if(welcome) welcome.textContent = 'Welcome back, ' + username + ' 👋';
+    const lu = document.getElementById('login-user');
+    if(lu) lu.value = username;
+  } else {
+    showView('setup');
+  }
+  // Hide app until authenticated
+  // Pre-fill client ID if saved
+  try {
+    const bpRaw = localStorage.getItem('bp_v3') || localStorage.getItem('mylife_bp_enc_v1') || '';
+    // client id is stored in bpState unencrypted for convenience
+    const bpPlain = localStorage.getItem('bp_v3');
+    if(bpPlain){ const d=JSON.parse(bpPlain); if(d.driveClientId){ const ci=document.getElementById('bp-client-id'); if(ci)ci.value=d.driveClientId; } }
+  } catch(e){}
+  // Pre-fill restore client ID if we have it stored
+  const savedCid = localStorage.getItem('mylife_drive_cid');
+  if(savedCid) {
+    const rci = document.getElementById('restore-client-id');
+    if(rci) rci.value = savedCid;
+    const bpci = document.getElementById('bp-client-id');
+    if(bpci) bpci.value = savedCid;
+  }
+  const ah = document.getElementById('app-header'); if(ah) ah.style.display='none';
+  const aw = document.getElementById('app-wrapper'); if(aw) aw.style.display='none';
+})();
+
+</script>
+
+<div id="bpToast"></div>
+<input type="file" id="bp-import-file" accept=".json" style="display:none" onchange="bpHandleImport(event)"/>
+
+</div><!-- end app-wrapper -->
+</body>
+</html>
