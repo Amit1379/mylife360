@@ -2,6 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+// ── Auto-load config.js from same folder ────────────────────────────────────
+// config.js should contain: window.MYLIFE_CONFIG = { clientId: "xxxx.apps.googleusercontent.com" };
+(function loadConfig() {
+  const script = document.createElement('script');
+  script.src = 'config.js';
+  script.onload = function() {
+    if(window.MYLIFE_CONFIG && window.MYLIFE_CONFIG.clientId) {
+      const cid = window.MYLIFE_CONFIG.clientId;
+      // Store in localStorage so it's available even before full app init
+      localStorage.setItem('mylife_drive_cid', cid);
+      // Fill all client ID fields once DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        ['bp-client-id','restore-client-id'].forEach(function(id) {
+          const el = document.getElementById(id);
+          if(el && !el.value) el.value = cid;
+        });
+        // Also set the JS variable if it exists
+        if(typeof driveClientId !== 'undefined') driveClientId = cid;
+      });
+    }
+  };
+  script.onerror = function() {
+    // config.js not found — silently continue, user can paste manually
+    console.info('MyLife: config.js not found — Client ID can be entered manually in Drive & Settings.');
+  };
+  document.head.appendChild(script);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MyLife — Personal Organizer</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1345,7 +1374,8 @@
         5. Paste Client ID below and click Connect
       </div>
       <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:5px">Google OAuth Client ID</label>
-      <input class="settings-input-dark" id="bp-client-id" placeholder="xxxx.apps.googleusercontent.com" oninput="driveClientIdChanged()"/>
+      <input class="settings-input-dark" id="bp-client-id" placeholder="Auto-loaded from config.js — or paste manually" oninput="driveClientIdChanged()"/>
+      <div id="config-loaded-badge" style="display:none;font-size:0.72rem;color:#7ec4a0;margin-top:4px">✅ Auto-loaded from config.js</div>
       <div id="bp-drive-connect-area">
         <button class="btn-sm btn-sm-primary" onclick="driveConnect()">🔐 Connect Google Drive</button>
       </div>
@@ -2315,7 +2345,11 @@ function driveClientIdChanged() {
 }
 
 async function driveConnect() {
-  const cid = (document.getElementById('bp-client-id')?.value || '').trim() || driveClientId;
+  const cid = (document.getElementById('bp-client-id')?.value || '').trim()
+    || driveClientId
+    || (window.MYLIFE_CONFIG && window.MYLIFE_CONFIG.clientId)
+    || localStorage.getItem('mylife_drive_cid')
+    || '';
   if(!cid) { bpShowToast('⚠️ Paste your Google OAuth Client ID first'); return; }
   driveClientId = cid; bpState.driveClientId = cid;
   const redirect = location.href.split('?')[0].split('#')[0];
@@ -3197,7 +3231,10 @@ function switchSetupTab(tab) {
 
 // ── Restore from Google Drive on a new browser ──────────────────────────────
 async function restoreFromDrive() {
-  const cid = (document.getElementById('restore-client-id')?.value || '').trim();
+  const cid = (document.getElementById('restore-client-id')?.value || '').trim()
+    || (window.MYLIFE_CONFIG && window.MYLIFE_CONFIG.clientId)
+    || localStorage.getItem('mylife_drive_cid')
+    || '';
   const hint = document.getElementById('restore-hint');
   if(!cid) { hint.textContent = 'Paste your Google OAuth Client ID first.'; return; }
   hint.textContent = '';
@@ -3320,12 +3357,16 @@ async function restoreFromDrive() {
     if(bpPlain){ const d=JSON.parse(bpPlain); if(d.driveClientId){ const ci=document.getElementById('bp-client-id'); if(ci)ci.value=d.driveClientId; } }
   } catch(e){}
   // Pre-fill restore client ID if we have it stored
-  const savedCid = localStorage.getItem('mylife_drive_cid');
+  // Pick up Client ID — priority: config.js > localStorage > bpState
+  const configCid = (window.MYLIFE_CONFIG && window.MYLIFE_CONFIG.clientId) ? window.MYLIFE_CONFIG.clientId : null;
+  const savedCid  = configCid || localStorage.getItem('mylife_drive_cid');
   if(savedCid) {
+    if(configCid) localStorage.setItem('mylife_drive_cid', configCid); // keep in sync
     const rci = document.getElementById('restore-client-id');
     if(rci) rci.value = savedCid;
     const bpci = document.getElementById('bp-client-id');
     if(bpci) bpci.value = savedCid;
+    if(typeof driveClientId !== 'undefined') driveClientId = savedCid;
   }
   const ah = document.getElementById('app-header'); if(ah) ah.style.display='none';
   const aw = document.getElementById('app-wrapper'); if(aw) aw.style.display='none';
